@@ -120,6 +120,8 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   network                 = google_compute_network.vpc.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_range.name]
+  
+  deletion_policy = "ABANDON"
 }
 
 # ================================================
@@ -130,6 +132,8 @@ resource "google_sql_database_instance" "postgres" {
   name             = "dot-net-postgres"
   database_version = "POSTGRES_15"
   region           = var.region
+  
+  deletion_protection = false
 
   settings {
     tier              = "db-f1-micro"
@@ -147,13 +151,13 @@ resource "google_sql_database_instance" "postgres" {
     }
   }
 
-  deletion_protection = false
-  depends_on          = [google_service_networking_connection.private_vpc_connection]
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 resource "google_sql_database" "database" {
-  name     = "dotnetdb"
-  instance = google_sql_database_instance.postgres.name
+  name            = "dotnetdb"
+  instance        = google_sql_database_instance.postgres.name
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_user" "postgres_user" {
@@ -264,6 +268,9 @@ resource "google_container_cluster" "primary" {
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
+
+  # Disable deletion protection for easy cleanup
+  deletion_protection = false
 
   # Remove default node pool
   remove_default_node_pool = true
