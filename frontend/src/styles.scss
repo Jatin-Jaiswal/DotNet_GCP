@@ -1,0 +1,109 @@
+/* Global styles for the application */
+/* Uses Google Material Design color palette */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* Material Design soft colors - Google style */
+:root {
+  --primary-color: #4285f4;
+  --primary-light: #669df6;
+  --primary-dark: #1967d2;
+  --accent-color: #34a853;
+  --warn-color: #ea4335;
+  --background-color: #f5f5f5;
+  --surface-color: #ffffff;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+}
+
+/* Container spacing */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Card styling */
+.mat-card {
+  margin-bottom: 20px;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+}
+
+/* Button styling */
+.mat-raised-button {
+  border-radius: 4px !important;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Table styling */
+.mat-table {
+  width: 100%;
+  background: white;
+}
+
+.mat-header-cell {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mat-cell {
+  color: var(--text-secondary);
+}
+
+/* Form field styling */
+.mat-form-field {
+  width: 100%;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Responsive grid */
+.grid-container {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .grid-2-col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .grid-2-col {
+    grid-template-columns: 1fr;
+  }
+}

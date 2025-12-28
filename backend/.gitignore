@@ -1,0 +1,5 @@
+# Backend build artifacts and temporary files
+bin/
+obj/
+*.log
+.DS_Store

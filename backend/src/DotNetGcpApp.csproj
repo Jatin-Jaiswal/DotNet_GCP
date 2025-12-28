@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DotNetGcpApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ASP.NET Core and Web API -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.0" />
+    
+    <!-- Swagger/OpenAPI for API documentation -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    
+    <!-- PostgreSQL database driver with connection pooling -->
+    <PackageReference Include="Npgsql" Version="7.0.0" />
+    
+    <!-- Redis client for Memorystore -->
+    <PackageReference Include="StackExchange.Redis" Version="2.6.0" />
+    
+    <!-- Google Cloud libraries -->
+    <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.0.0" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.0.0" />
+    
+    <!-- JSON serialization -->
+    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>

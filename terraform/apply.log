@@ -1,0 +1,1969 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+
+Terraform will perform the following actions:
+
+[1m  # google_artifact_registry_repository.docker_repo[0m will be created
+[0m  [32m+[0m[0m resource "google_artifact_registry_repository" "docker_repo" {
+      [32m+[0m[0m create_time      = (known after apply)
+      [32m+[0m[0m effective_labels = (known after apply)
+      [32m+[0m[0m format           = "DOCKER"
+      [32m+[0m[0m id               = (known after apply)
+      [32m+[0m[0m location         = "asia-south2"
+      [32m+[0m[0m mode             = "STANDARD_REPOSITORY"
+      [32m+[0m[0m name             = (known after apply)
+      [32m+[0m[0m project          = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m repository_id    = "dot-net-repo"
+      [32m+[0m[0m terraform_labels = (known after apply)
+      [32m+[0m[0m update_time      = (known after apply)
+    }
+
+[1m  # google_compute_address.bastion_ip[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_address" "bastion_ip" {
+      [32m+[0m[0m address            = (known after apply)
+      [32m+[0m[0m address_type       = "EXTERNAL"
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m effective_labels   = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m label_fingerprint  = (known after apply)
+      [32m+[0m[0m name               = "bastion-ip"
+      [32m+[0m[0m network_tier       = (known after apply)
+      [32m+[0m[0m prefix_length      = (known after apply)
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose            = (known after apply)
+      [32m+[0m[0m region             = (known after apply)
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m subnetwork         = (known after apply)
+      [32m+[0m[0m terraform_labels   = (known after apply)
+      [32m+[0m[0m users              = (known after apply)
+    }
+
+[1m  # google_compute_firewall.allow_http[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_http" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-http-https"
+      [32m+[0m[0m network            = "dot-net-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "0.0.0.0/0",
+        ]
+      [32m+[0m[0m target_tags        = [
+          [32m+[0m[0m "bastion",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "80",
+              [32m+[0m[0m "443",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+    }
+
+[1m  # google_compute_firewall.allow_internal[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_internal" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-internal"
+      [32m+[0m[0m network            = "dot-net-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "10.0.0.0/16",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "0-65535",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "0-65535",
+            ]
+          [32m+[0m[0m protocol = "udp"
+        }
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = []
+          [32m+[0m[0m protocol = "icmp"
+        }
+    }
+
+[1m  # google_compute_firewall.allow_ssh[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_ssh" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-ssh"
+      [32m+[0m[0m network            = "dot-net-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "0.0.0.0/0",
+        ]
+      [32m+[0m[0m target_tags        = [
+          [32m+[0m[0m "bastion",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "22",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+    }
+
+[1m  # google_compute_global_address.private_ip_range[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_global_address" "private_ip_range" {
+      [32m+[0m[0m address            = (known after apply)
+      [32m+[0m[0m address_type       = "INTERNAL"
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m effective_labels   = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m label_fingerprint  = (known after apply)
+      [32m+[0m[0m name               = "private-ip-range"
+      [32m+[0m[0m network            = (known after apply)
+      [32m+[0m[0m prefix_length      = 16
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose            = "VPC_PEERING"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m terraform_labels   = (known after apply)
+    }
+
+[1m  # google_compute_instance.bastion[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_instance" "bastion" {
+      [32m+[0m[0m can_ip_forward          = false
+      [32m+[0m[0m cpu_platform            = (known after apply)
+      [32m+[0m[0m current_status          = (known after apply)
+      [32m+[0m[0m deletion_protection     = false
+      [32m+[0m[0m effective_labels        = (known after apply)
+      [32m+[0m[0m guest_accelerator       = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m instance_id             = (known after apply)
+      [32m+[0m[0m label_fingerprint       = (known after apply)
+      [32m+[0m[0m machine_type            = "e2-small"
+      [32m+[0m[0m metadata_fingerprint    = (known after apply)
+      [32m+[0m[0m metadata_startup_script = <<-EOT
+            #!/bin/bash
+                
+                # Update system
+                apt-get update
+                apt-get install -y apt-transport-https ca-certificates curl software-properties-common nginx
+                
+                # Install Docker
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+                add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+                apt-get update
+                apt-get install -y docker-ce docker-ce-cli containerd.io
+                
+                # Install kubectl
+                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+                
+                # Install gcloud
+                echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+                curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+                apt-get update && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin
+                
+                # Configure kubectl to connect to GKE
+                gcloud container clusters get-credentials private-gke-cluster --region=asia-south2
+                
+                # Configure Nginx as reverse proxy
+                cat > /etc/nginx/sites-available/default <<'NGINX'
+                server {
+                    listen 80 default_server;
+                    server_name _;
+            
+                    # Proxy frontend
+                    location / {
+                        proxy_pass http://10.0.2.9/;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    }
+            
+                    # Proxy backend API
+                    location /api/ {
+                        proxy_pass http://10.0.2.9/api/;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    }
+                }
+            NGINX
+                
+                systemctl restart nginx
+                systemctl enable nginx
+        EOT
+      [32m+[0m[0m min_cpu_platform        = (known after apply)
+      [32m+[0m[0m name                    = "dot-net-bastion-vm"
+      [32m+[0m[0m project                 = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link               = (known after apply)
+      [32m+[0m[0m tags                    = [
+          [32m+[0m[0m "bastion",
+        ]
+      [32m+[0m[0m tags_fingerprint        = (known after apply)
+      [32m+[0m[0m terraform_labels        = (known after apply)
+      [32m+[0m[0m zone                    = "asia-south2-b"
+
+      [32m+[0m[0m boot_disk {
+          [32m+[0m[0m auto_delete                = true
+          [32m+[0m[0m device_name                = (known after apply)
+          [32m+[0m[0m disk_encryption_key_sha256 = (known after apply)
+          [32m+[0m[0m kms_key_self_link          = (known after apply)
+          [32m+[0m[0m mode                       = "READ_WRITE"
+          [32m+[0m[0m source                     = (known after apply)
+
+          [32m+[0m[0m initialize_params {
+              [32m+[0m[0m image                  = "ubuntu-os-cloud/ubuntu-2204-lts"
+              [32m+[0m[0m labels                 = (known after apply)
+              [32m+[0m[0m provisioned_iops       = (known after apply)
+              [32m+[0m[0m provisioned_throughput = (known after apply)
+              [32m+[0m[0m size                   = 20
+              [32m+[0m[0m type                   = (known after apply)
+            }
+        }
+
+      [32m+[0m[0m confidential_instance_config (known after apply)
+
+      [32m+[0m[0m network_interface {
+          [32m+[0m[0m internal_ipv6_prefix_length = (known after apply)
+          [32m+[0m[0m ipv6_access_type            = (known after apply)
+          [32m+[0m[0m ipv6_address                = (known after apply)
+          [32m+[0m[0m name                        = (known after apply)
+          [32m+[0m[0m network                     = "dot-net-vpc"
+          [32m+[0m[0m network_ip                  = (known after apply)
+          [32m+[0m[0m stack_type                  = (known after apply)
+          [32m+[0m[0m subnetwork                  = "public-subnet"
+          [32m+[0m[0m subnetwork_project          = (known after apply)
+
+          [32m+[0m[0m access_config {
+              [32m+[0m[0m nat_ip       = (known after apply)
+              [32m+[0m[0m network_tier = (known after apply)
+            }
+        }
+
+      [32m+[0m[0m reservation_affinity (known after apply)
+
+      [32m+[0m[0m scheduling (known after apply)
+
+      [32m+[0m[0m service_account {
+          [32m+[0m[0m email  = (known after apply)
+          [32m+[0m[0m scopes = [
+              [32m+[0m[0m "https://www.googleapis.com/auth/cloud-platform",
+            ]
+        }
+    }
+
+[1m  # google_compute_network.vpc[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_network" "vpc" {
+      [32m+[0m[0m auto_create_subnetworks                   = false
+      [32m+[0m[0m delete_default_routes_on_create           = false
+      [32m+[0m[0m gateway_ipv4                              = (known after apply)
+      [32m+[0m[0m id                                        = (known after apply)
+      [32m+[0m[0m internal_ipv6_range                       = (known after apply)
+      [32m+[0m[0m mtu                                       = (known after apply)
+      [32m+[0m[0m name                                      = "dot-net-vpc"
+      [32m+[0m[0m network_firewall_policy_enforcement_order = "AFTER_CLASSIC_FIREWALL"
+      [32m+[0m[0m numeric_id                                = (known after apply)
+      [32m+[0m[0m project                                   = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m routing_mode                              = (known after apply)
+      [32m+[0m[0m self_link                                 = (known after apply)
+    }
+
+[1m  # google_compute_router.router[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_router" "router" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "dot-net-router"
+      [32m+[0m[0m network            = (known after apply)
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m region             = "asia-south2"
+      [32m+[0m[0m self_link          = (known after apply)
+    }
+
+[1m  # google_compute_router_nat.nat[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_router_nat" "nat" {
+      [32m+[0m[0m auto_network_tier                   = (known after apply)
+      [32m+[0m[0m enable_dynamic_port_allocation      = (known after apply)
+      [32m+[0m[0m enable_endpoint_independent_mapping = (known after apply)
+      [32m+[0m[0m endpoint_types                      = (known after apply)
+      [32m+[0m[0m icmp_idle_timeout_sec               = 30
+      [32m+[0m[0m id                                  = (known after apply)
+      [32m+[0m[0m min_ports_per_vm                    = (known after apply)
+      [32m+[0m[0m name                                = "dot-net-nat"
+      [32m+[0m[0m nat_ip_allocate_option              = "AUTO_ONLY"
+      [32m+[0m[0m project                             = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m region                              = "asia-south2"
+      [32m+[0m[0m router                              = "dot-net-router"
+      [32m+[0m[0m source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+      [32m+[0m[0m tcp_established_idle_timeout_sec    = 1200
+      [32m+[0m[0m tcp_time_wait_timeout_sec           = 120
+      [32m+[0m[0m tcp_transitory_idle_timeout_sec     = 30
+      [32m+[0m[0m udp_idle_timeout_sec                = 30
+    }
+
+[1m  # google_compute_subnetwork.private_subnet[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_subnetwork" "private_subnet" {
+      [32m+[0m[0m creation_timestamp         = (known after apply)
+      [32m+[0m[0m external_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m fingerprint                = (known after apply)
+      [32m+[0m[0m gateway_address            = (known after apply)
+      [32m+[0m[0m id                         = (known after apply)
+      [32m+[0m[0m internal_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m ip_cidr_range              = "10.0.1.0/24"
+      [32m+[0m[0m ipv6_cidr_range            = (known after apply)
+      [32m+[0m[0m name                       = "private-subnet"
+      [32m+[0m[0m network                    = (known after apply)
+      [32m+[0m[0m private_ip_google_access   = true
+      [32m+[0m[0m private_ipv6_google_access = (known after apply)
+      [32m+[0m[0m project                    = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose                    = (known after apply)
+      [32m+[0m[0m region                     = "asia-south2"
+      [32m+[0m[0m secondary_ip_range         = (known after apply)
+      [32m+[0m[0m self_link                  = (known after apply)
+      [32m+[0m[0m stack_type                 = (known after apply)
+    }
+
+[1m  # google_compute_subnetwork.public_subnet[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_subnetwork" "public_subnet" {
+      [32m+[0m[0m creation_timestamp         = (known after apply)
+      [32m+[0m[0m external_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m fingerprint                = (known after apply)
+      [32m+[0m[0m gateway_address            = (known after apply)
+      [32m+[0m[0m id                         = (known after apply)
+      [32m+[0m[0m internal_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m ip_cidr_range              = "10.0.2.0/24"
+      [32m+[0m[0m ipv6_cidr_range            = (known after apply)
+      [32m+[0m[0m name                       = "public-subnet"
+      [32m+[0m[0m network                    = (known after apply)
+      [32m+[0m[0m private_ip_google_access   = (known after apply)
+      [32m+[0m[0m private_ipv6_google_access = (known after apply)
+      [32m+[0m[0m project                    = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose                    = (known after apply)
+      [32m+[0m[0m region                     = "asia-south2"
+      [32m+[0m[0m secondary_ip_range         = (known after apply)
+      [32m+[0m[0m self_link                  = (known after apply)
+      [32m+[0m[0m stack_type                 = (known after apply)
+    }
+
+[1m  # google_container_cluster.primary[0m will be created
+[0m  [32m+[0m[0m resource "google_container_cluster" "primary" {
+      [32m+[0m[0m cluster_ipv4_cidr                        = (known after apply)
+      [32m+[0m[0m datapath_provider                        = (known after apply)
+      [32m+[0m[0m default_max_pods_per_node                = (known after apply)
+      [32m+[0m[0m deletion_protection                      = true
+      [32m+[0m[0m enable_cilium_clusterwide_network_policy = false
+      [32m+[0m[0m enable_intranode_visibility              = (known after apply)
+      [32m+[0m[0m enable_kubernetes_alpha                  = false
+      [32m+[0m[0m enable_l4_ilb_subsetting                 = false
+      [32m+[0m[0m enable_legacy_abac                       = false
+      [32m+[0m[0m enable_multi_networking                  = false
+      [32m+[0m[0m enable_shielded_nodes                    = true
+      [32m+[0m[0m endpoint                                 = (known after apply)
+      [32m+[0m[0m id                                       = (known after apply)
+      [32m+[0m[0m initial_node_count                       = 1
+      [32m+[0m[0m label_fingerprint                        = (known after apply)
+      [32m+[0m[0m location                                 = "asia-south2"
+      [32m+[0m[0m logging_service                          = (known after apply)
+      [32m+[0m[0m master_version                           = (known after apply)
+      [32m+[0m[0m monitoring_service                       = (known after apply)
+      [32m+[0m[0m name                                     = "private-gke-cluster"
+      [32m+[0m[0m network                                  = "dot-net-vpc"
+      [32m+[0m[0m networking_mode                          = (known after apply)
+      [32m+[0m[0m node_locations                           = (known after apply)
+      [32m+[0m[0m node_version                             = (known after apply)
+      [32m+[0m[0m operation                                = (known after apply)
+      [32m+[0m[0m private_ipv6_google_access               = (known after apply)
+      [32m+[0m[0m project                                  = (known after apply)
+      [32m+[0m[0m remove_default_node_pool                 = true
+      [32m+[0m[0m self_link                                = (known after apply)
+      [32m+[0m[0m services_ipv4_cidr                       = (known after apply)
+      [32m+[0m[0m subnetwork                               = "private-subnet"
+      [32m+[0m[0m tpu_ipv4_cidr_block                      = (known after apply)
+
+      [32m+[0m[0m addons_config {
+          [32m+[0m[0m cloudrun_config (known after apply)
+          [32m+[0m[0m config_connector_config (known after apply)
+          [32m+[0m[0m dns_cache_config (known after apply)
+          [32m+[0m[0m gce_persistent_disk_csi_driver_config (known after apply)
+          [32m+[0m[0m gcp_filestore_csi_driver_config (known after apply)
+          [32m+[0m[0m gcs_fuse_csi_driver_config (known after apply)
+          [32m+[0m[0m gke_backup_agent_config (known after apply)
+          [32m+[0m[0m horizontal_pod_autoscaling (known after apply)
+          [32m+[0m[0m http_load_balancing {
+              [32m+[0m[0m disabled = false
+            }
+          [32m+[0m[0m network_policy_config (known after apply)
+          [32m+[0m[0m ray_operator_config (known after apply)
+          [32m+[0m[0m stateful_ha_config (known after apply)
+        }
+
+      [32m+[0m[0m authenticator_groups_config (known after apply)
+
+      [32m+[0m[0m cluster_autoscaling (known after apply)
+
+      [32m+[0m[0m confidential_nodes (known after apply)
+
+      [32m+[0m[0m cost_management_config (known after apply)
+
+      [32m+[0m[0m database_encryption (known after apply)
+
+      [32m+[0m[0m default_snat_status (known after apply)
+
+      [32m+[0m[0m gateway_api_config (known after apply)
+
+      [32m+[0m[0m identity_service_config (known after apply)
+
+      [32m+[0m[0m ip_allocation_policy {
+          [32m+[0m[0m cluster_ipv4_cidr_block       = "10.4.0.0/14"
+          [32m+[0m[0m cluster_secondary_range_name  = (known after apply)
+          [32m+[0m[0m services_ipv4_cidr_block      = "10.8.0.0/20"
+          [32m+[0m[0m services_secondary_range_name = (known after apply)
+          [32m+[0m[0m stack_type                    = "IPV4"
+
+          [32m+[0m[0m pod_cidr_overprovision_config (known after apply)
+        }
+
+      [32m+[0m[0m logging_config (known after apply)
+
+      [32m+[0m[0m master_auth (known after apply)
+
+      [32m+[0m[0m master_authorized_networks_config {
+          [32m+[0m[0m gcp_public_cidrs_access_enabled = (known after apply)
+
+          [32m+[0m[0m cidr_blocks {
+              [32m+[0m[0m cidr_block   = "10.0.2.0/24"
+              [32m+[0m[0m display_name = "bastion-subnet"
+            }
+        }
+
+      [32m+[0m[0m mesh_certificates (known after apply)
+
+      [32m+[0m[0m monitoring_config (known after apply)
+
+      [32m+[0m[0m node_config (known after apply)
+
+      [32m+[0m[0m node_pool (known after apply)
+
+      [32m+[0m[0m node_pool_auto_config (known after apply)
+
+      [32m+[0m[0m node_pool_defaults (known after apply)
+
+      [32m+[0m[0m notification_config (known after apply)
+
+      [32m+[0m[0m private_cluster_config {
+          [32m+[0m[0m enable_private_endpoint = true
+          [32m+[0m[0m enable_private_nodes    = true
+          [32m+[0m[0m master_ipv4_cidr_block  = "172.16.0.0/28"
+          [32m+[0m[0m peering_name            = (known after apply)
+          [32m+[0m[0m private_endpoint        = (known after apply)
+          [32m+[0m[0m public_endpoint         = (known after apply)
+
+          [32m+[0m[0m master_global_access_config (known after apply)
+        }
+
+      [32m+[0m[0m release_channel (known after apply)
+
+      [32m+[0m[0m security_posture_config (known after apply)
+
+      [32m+[0m[0m service_external_ips_config (known after apply)
+
+      [32m+[0m[0m vertical_pod_autoscaling (known after apply)
+
+      [32m+[0m[0m workload_identity_config {
+          [32m+[0m[0m workload_pool = "project-84d8bfc9-cd8e-4b3c-b15.svc.id.goog"
+        }
+    }
+
+[1m  # google_container_node_pool.primary_nodes[0m will be created
+[0m  [32m+[0m[0m resource "google_container_node_pool" "primary_nodes" {
+      [32m+[0m[0m cluster                     = "private-gke-cluster"
+      [32m+[0m[0m id                          = (known after apply)
+      [32m+[0m[0m initial_node_count          = (known after apply)
+      [32m+[0m[0m instance_group_urls         = (known after apply)
+      [32m+[0m[0m location                    = "asia-south2"
+      [32m+[0m[0m managed_instance_group_urls = (known after apply)
+      [32m+[0m[0m max_pods_per_node           = (known after apply)
+      [32m+[0m[0m name                        = "default-pool"
+      [32m+[0m[0m name_prefix                 = (known after apply)
+      [32m+[0m[0m node_count                  = 2
+      [32m+[0m[0m node_locations              = (known after apply)
+      [32m+[0m[0m operation                   = (known after apply)
+      [32m+[0m[0m project                     = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m version                     = (known after apply)
+
+      [32m+[0m[0m autoscaling {
+          [32m+[0m[0m location_policy = (known after apply)
+          [32m+[0m[0m max_node_count  = 4
+          [32m+[0m[0m min_node_count  = 2
+        }
+
+      [32m+[0m[0m management (known after apply)
+
+      [32m+[0m[0m network_config (known after apply)
+
+      [32m+[0m[0m node_config {
+          [32m+[0m[0m disk_size_gb      = 20
+          [32m+[0m[0m disk_type         = "pd-standard"
+          [32m+[0m[0m effective_taints  = (known after apply)
+          [32m+[0m[0m guest_accelerator = (known after apply)
+          [32m+[0m[0m image_type        = (known after apply)
+          [32m+[0m[0m labels            = (known after apply)
+          [32m+[0m[0m local_ssd_count   = (known after apply)
+          [32m+[0m[0m logging_variant   = (known after apply)
+          [32m+[0m[0m machine_type      = "e2-medium"
+          [32m+[0m[0m metadata          = (known after apply)
+          [32m+[0m[0m min_cpu_platform  = (known after apply)
+          [32m+[0m[0m oauth_scopes      = [
+              [32m+[0m[0m "https://www.googleapis.com/auth/cloud-platform",
+            ]
+          [32m+[0m[0m preemptible       = false
+          [32m+[0m[0m service_account   = (known after apply)
+          [32m+[0m[0m spot              = false
+          [32m+[0m[0m tags              = [
+              [32m+[0m[0m "gke-node",
+            ]
+
+          [32m+[0m[0m confidential_nodes (known after apply)
+
+          [32m+[0m[0m gcfs_config (known after apply)
+
+          [32m+[0m[0m kubelet_config (known after apply)
+
+          [32m+[0m[0m shielded_instance_config (known after apply)
+
+          [32m+[0m[0m workload_metadata_config {
+              [32m+[0m[0m mode = "GKE_METADATA"
+            }
+        }
+
+      [32m+[0m[0m upgrade_settings (known after apply)
+    }
+
+[1m  # google_project_iam_member.backend_cloudsql[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "backend_cloudsql" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m role    = "roles/cloudsql.client"
+    }
+
+[1m  # google_project_iam_member.backend_redis[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "backend_redis" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m role    = "roles/redis.editor"
+    }
+
+[1m  # google_project_iam_member.bastion_gke[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "bastion_gke" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m role    = "roles/container.developer"
+    }
+
+[1m  # google_pubsub_subscription.subscription[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_subscription" "subscription" {
+      [32m+[0m[0m ack_deadline_seconds       = 20
+      [32m+[0m[0m effective_labels           = (known after apply)
+      [32m+[0m[0m id                         = (known after apply)
+      [32m+[0m[0m message_retention_duration = "604800s"
+      [32m+[0m[0m name                       = "dot-net-sub"
+      [32m+[0m[0m project                    = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m terraform_labels           = (known after apply)
+      [32m+[0m[0m topic                      = "dot-net-topic"
+
+      [32m+[0m[0m expiration_policy (known after apply)
+
+      [32m+[0m[0m retry_policy {
+          [32m+[0m[0m maximum_backoff = "600s"
+          [32m+[0m[0m minimum_backoff = "10s"
+        }
+    }
+
+[1m  # google_pubsub_subscription_iam_member.backend_pubsub_subscriber[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_subscription_iam_member" "backend_pubsub_subscriber" {
+      [32m+[0m[0m etag         = (known after apply)
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = (known after apply)
+      [32m+[0m[0m project      = (known after apply)
+      [32m+[0m[0m role         = "roles/pubsub.subscriber"
+      [32m+[0m[0m subscription = "dot-net-sub"
+    }
+
+[1m  # google_pubsub_topic.topic[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_topic" "topic" {
+      [32m+[0m[0m effective_labels = (known after apply)
+      [32m+[0m[0m id               = (known after apply)
+      [32m+[0m[0m name             = "dot-net-topic"
+      [32m+[0m[0m project          = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m terraform_labels = (known after apply)
+
+      [32m+[0m[0m message_storage_policy (known after apply)
+
+      [32m+[0m[0m schema_settings (known after apply)
+    }
+
+[1m  # google_pubsub_topic_iam_member.backend_pubsub_publisher[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_topic_iam_member" "backend_pubsub_publisher" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = (known after apply)
+      [32m+[0m[0m role    = "roles/pubsub.publisher"
+      [32m+[0m[0m topic   = "dot-net-topic"
+    }
+
+[1m  # google_redis_instance.redis[0m will be created
+[0m  [32m+[0m[0m resource "google_redis_instance" "redis" {
+      [32m+[0m[0m alternative_location_id  = (known after apply)
+      [32m+[0m[0m auth_enabled             = false
+      [32m+[0m[0m auth_string              = (sensitive value)
+      [32m+[0m[0m authorized_network       = (known after apply)
+      [32m+[0m[0m connect_mode             = "DIRECT_PEERING"
+      [32m+[0m[0m create_time              = (known after apply)
+      [32m+[0m[0m current_location_id      = (known after apply)
+      [32m+[0m[0m effective_labels         = (known after apply)
+      [32m+[0m[0m host                     = (known after apply)
+      [32m+[0m[0m id                       = (known after apply)
+      [32m+[0m[0m location_id              = (known after apply)
+      [32m+[0m[0m maintenance_schedule     = (known after apply)
+      [32m+[0m[0m maintenance_version      = (known after apply)
+      [32m+[0m[0m memory_size_gb           = 1
+      [32m+[0m[0m name                     = "dot-net-redis"
+      [32m+[0m[0m nodes                    = (known after apply)
+      [32m+[0m[0m persistence_iam_identity = (known after apply)
+      [32m+[0m[0m port                     = (known after apply)
+      [32m+[0m[0m project                  = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m read_endpoint            = (known after apply)
+      [32m+[0m[0m read_endpoint_port       = (known after apply)
+      [32m+[0m[0m read_replicas_mode       = (known after apply)
+      [32m+[0m[0m redis_version            = "REDIS_7_0"
+      [32m+[0m[0m region                   = "asia-south2"
+      [32m+[0m[0m replica_count            = (known after apply)
+      [32m+[0m[0m reserved_ip_range        = (known after apply)
+      [32m+[0m[0m secondary_ip_range       = (known after apply)
+      [32m+[0m[0m server_ca_certs          = (known after apply)
+      [32m+[0m[0m terraform_labels         = (known after apply)
+      [32m+[0m[0m tier                     = "BASIC"
+      [32m+[0m[0m transit_encryption_mode  = "DISABLED"
+
+      [32m+[0m[0m persistence_config (known after apply)
+    }
+
+[1m  # google_service_account.backend_sa[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account" "backend_sa" {
+      [32m+[0m[0m account_id   = "backend-gke-sa"
+      [32m+[0m[0m disabled     = false
+      [32m+[0m[0m display_name = "Backend GKE Service Account"
+      [32m+[0m[0m email        = (known after apply)
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = (known after apply)
+      [32m+[0m[0m name         = (known after apply)
+      [32m+[0m[0m project      = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m unique_id    = (known after apply)
+    }
+
+[1m  # google_service_account.bastion_sa[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account" "bastion_sa" {
+      [32m+[0m[0m account_id   = "bastion-sa"
+      [32m+[0m[0m disabled     = false
+      [32m+[0m[0m display_name = "Bastion VM Service Account"
+      [32m+[0m[0m email        = (known after apply)
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = (known after apply)
+      [32m+[0m[0m name         = (known after apply)
+      [32m+[0m[0m project      = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m unique_id    = (known after apply)
+    }
+
+[1m  # google_service_account_iam_member.backend_workload_identity[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account_iam_member" "backend_workload_identity" {
+      [32m+[0m[0m etag               = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m member             = "serviceAccount:project-84d8bfc9-cd8e-4b3c-b15.svc.id.goog[default/backend-sa]"
+      [32m+[0m[0m role               = "roles/iam.workloadIdentityUser"
+      [32m+[0m[0m service_account_id = (known after apply)
+    }
+
+[1m  # google_service_networking_connection.private_vpc_connection[0m will be created
+[0m  [32m+[0m[0m resource "google_service_networking_connection" "private_vpc_connection" {
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m network                 = (known after apply)
+      [32m+[0m[0m peering                 = (known after apply)
+      [32m+[0m[0m reserved_peering_ranges = [
+          [32m+[0m[0m "private-ip-range",
+        ]
+      [32m+[0m[0m service                 = "servicenetworking.googleapis.com"
+    }
+
+[1m  # google_sql_database.database[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_database" "database" {
+      [32m+[0m[0m charset         = (known after apply)
+      [32m+[0m[0m collation       = (known after apply)
+      [32m+[0m[0m deletion_policy = "DELETE"
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m instance        = "dot-net-postgres"
+      [32m+[0m[0m name            = "dotnetdb"
+      [32m+[0m[0m project         = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link       = (known after apply)
+    }
+
+[1m  # google_sql_database_instance.postgres[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_database_instance" "postgres" {
+      [32m+[0m[0m available_maintenance_versions = (known after apply)
+      [32m+[0m[0m connection_name                = (known after apply)
+      [32m+[0m[0m database_version               = "POSTGRES_15"
+      [32m+[0m[0m deletion_protection            = false
+      [32m+[0m[0m dns_name                       = (known after apply)
+      [32m+[0m[0m encryption_key_name            = (known after apply)
+      [32m+[0m[0m first_ip_address               = (known after apply)
+      [32m+[0m[0m id                             = (known after apply)
+      [32m+[0m[0m instance_type                  = (known after apply)
+      [32m+[0m[0m ip_address                     = (known after apply)
+      [32m+[0m[0m maintenance_version            = (known after apply)
+      [32m+[0m[0m master_instance_name           = (known after apply)
+      [32m+[0m[0m name                           = "dot-net-postgres"
+      [32m+[0m[0m private_ip_address             = (known after apply)
+      [32m+[0m[0m project                        = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m psc_service_attachment_link    = (known after apply)
+      [32m+[0m[0m public_ip_address              = (known after apply)
+      [32m+[0m[0m region                         = "asia-south2"
+      [32m+[0m[0m self_link                      = (known after apply)
+      [32m+[0m[0m server_ca_cert                 = (sensitive value)
+      [32m+[0m[0m service_account_email_address  = (known after apply)
+
+      [32m+[0m[0m replica_configuration (known after apply)
+
+      [32m+[0m[0m settings {
+          [32m+[0m[0m activation_policy     = "ALWAYS"
+          [32m+[0m[0m availability_type     = "ZONAL"
+          [32m+[0m[0m connector_enforcement = (known after apply)
+          [32m+[0m[0m disk_autoresize       = true
+          [32m+[0m[0m disk_autoresize_limit = 0
+          [32m+[0m[0m disk_size             = 10
+          [32m+[0m[0m disk_type             = "PD_SSD"
+          [32m+[0m[0m edition               = "ENTERPRISE"
+          [32m+[0m[0m pricing_plan          = "PER_USE"
+          [32m+[0m[0m tier                  = "db-f1-micro"
+          [32m+[0m[0m user_labels           = (known after apply)
+          [32m+[0m[0m version               = (known after apply)
+
+          [32m+[0m[0m backup_configuration {
+              [32m+[0m[0m enabled                        = false
+              [32m+[0m[0m start_time                     = (known after apply)
+              [32m+[0m[0m transaction_log_retention_days = (known after apply)
+
+              [32m+[0m[0m backup_retention_settings (known after apply)
+            }
+
+          [32m+[0m[0m insights_config (known after apply)
+
+          [32m+[0m[0m ip_configuration {
+              [32m+[0m[0m ipv4_enabled    = false
+              [32m+[0m[0m private_network = (known after apply)
+              [32m+[0m[0m server_ca_mode  = (known after apply)
+              [32m+[0m[0m ssl_mode        = (known after apply)
+            }
+
+          [32m+[0m[0m location_preference (known after apply)
+        }
+    }
+
+[1m  # google_sql_user.postgres_user[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_user" "postgres_user" {
+      [32m+[0m[0m host                    = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m instance                = "dot-net-postgres"
+      [32m+[0m[0m name                    = "postgres"
+      [32m+[0m[0m password                = (sensitive value)
+      [32m+[0m[0m project                 = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m sql_server_user_details = (known after apply)
+    }
+
+[1m  # google_storage_bucket.bucket[0m will be created
+[0m  [32m+[0m[0m resource "google_storage_bucket" "bucket" {
+      [32m+[0m[0m effective_labels            = (known after apply)
+      [32m+[0m[0m force_destroy               = true
+      [32m+[0m[0m id                          = (known after apply)
+      [32m+[0m[0m location                    = "ASIA-SOUTH2"
+      [32m+[0m[0m name                        = "dot-net-bucket"
+      [32m+[0m[0m project                     = (known after apply)
+      [32m+[0m[0m project_number              = (known after apply)
+      [32m+[0m[0m public_access_prevention    = (known after apply)
+      [32m+[0m[0m rpo                         = (known after apply)
+      [32m+[0m[0m self_link                   = (known after apply)
+      [32m+[0m[0m storage_class               = "STANDARD"
+      [32m+[0m[0m terraform_labels            = (known after apply)
+      [32m+[0m[0m uniform_bucket_level_access = true
+      [32m+[0m[0m url                         = (known after apply)
+
+      [32m+[0m[0m cors {
+          [32m+[0m[0m max_age_seconds = 3600
+          [32m+[0m[0m method          = [
+              [32m+[0m[0m "GET",
+              [32m+[0m[0m "HEAD",
+              [32m+[0m[0m "PUT",
+              [32m+[0m[0m "POST",
+              [32m+[0m[0m "DELETE",
+            ]
+          [32m+[0m[0m origin          = [
+              [32m+[0m[0m "*",
+            ]
+          [32m+[0m[0m response_header = [
+              [32m+[0m[0m "*",
+            ]
+        }
+
+      [32m+[0m[0m soft_delete_policy (known after apply)
+
+      [32m+[0m[0m versioning (known after apply)
+
+      [32m+[0m[0m website (known after apply)
+    }
+
+[1m  # google_storage_bucket_iam_member.backend_storage[0m will be created
+[0m  [32m+[0m[0m resource "google_storage_bucket_iam_member" "backend_storage" {
+      [32m+[0m[0m bucket = "dot-net-bucket"
+      [32m+[0m[0m etag   = (known after apply)
+      [32m+[0m[0m id     = (known after apply)
+      [32m+[0m[0m member = (known after apply)
+      [32m+[0m[0m role   = "roles/storage.objectAdmin"
+    }
+
+[1mPlan:[0m 31 to add, 0 to change, 0 to destroy.
+[0m
+Changes to Outputs:
+  [32m+[0m[0m artifact_registry_repository = (known after apply)
+  [32m+[0m[0m backend_service_account      = (known after apply)
+  [32m+[0m[0m bastion_external_ip          = (known after apply)
+  [32m+[0m[0m bastion_service_account      = (known after apply)
+  [32m+[0m[0m cloudsql_private_ip          = (known after apply)
+  [32m+[0m[0m gke_cluster_endpoint         = (sensitive value)
+  [32m+[0m[0m redis_host                   = (known after apply)
+  [32m+[0m[0m redis_port                   = (known after apply)
+[0m[1mgoogle_service_account.bastion_sa: Creating...[0m[0m
+[0m[1mgoogle_service_account.backend_sa: Creating...[0m[0m
+[0m[1mgoogle_compute_network.vpc: Creating...[0m[0m
+[0m[1mgoogle_pubsub_topic.topic: Creating...[0m[0m
+[0m[1mgoogle_compute_address.bastion_ip: Creating...[0m[0m
+[0m[1mgoogle_artifact_registry_repository.docker_repo: Creating...[0m[0m
+[0m[1mgoogle_storage_bucket.bucket: Creating...[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError creating Network: googleapi: Error 403: Required 'compute.networks.create' permission for 'projects/project-84d8bfc9-cd8e-4b3c-b15/global/networks/dot-net-vpc', forbidden[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_compute_network.vpc,
+[31m│[0m [0m  on main.tf line 21, in resource "google_compute_network" "vpc":
+[31m│[0m [0m  21: resource "google_compute_network" "vpc" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError creating Topic: googleapi: Error 403: User not authorized to perform this action.[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_pubsub_topic.topic,
+[31m│[0m [0m  on main.tf line 185, in resource "google_pubsub_topic" "topic":
+[31m│[0m [0m 185: resource "google_pubsub_topic" "topic" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mgoogleapi: Error 403: j24199966@gmail.com does not have storage.buckets.create access to the Google Cloud project. Permission 'storage.buckets.create' denied on resource (or it may not exist)., forbidden[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_storage_bucket.bucket,
+[31m│[0m [0m  on main.tf line 205, in resource "google_storage_bucket" "bucket":
+[31m│[0m [0m 205: resource "google_storage_bucket" "bucket" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError creating Repository: googleapi: Error 403: Permission 'artifactregistry.repositories.create' denied on resource '//artifactregistry.googleapis.com/projects/project-84d8bfc9-cd8e-4b3c-b15/locations/asia-south2' (or it may not exist).
+[31m│[0m [0mDetails:
+[31m│[0m [0m[
+[31m│[0m [0m  {
+[31m│[0m [0m    "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+[31m│[0m [0m    "domain": "artifactregistry.googleapis.com",
+[31m│[0m [0m    "metadata": {
+[31m│[0m [0m      "permission": "artifactregistry.repositories.create",
+[31m│[0m [0m      "resource": "projects/project-84d8bfc9-cd8e-4b3c-b15/locations/asia-south2"
+[31m│[0m [0m    },
+[31m│[0m [0m    "reason": "IAM_PERMISSION_DENIED"
+[31m│[0m [0m  }
+[31m│[0m [0m][0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_artifact_registry_repository.docker_repo,
+[31m│[0m [0m  on main.tf line 224, in resource "google_artifact_registry_repository" "docker_repo":
+[31m│[0m [0m 224: resource "google_artifact_registry_repository" "docker_repo" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError creating service account: googleapi: Error 403: Permission 'iam.serviceAccounts.create' denied on resource (or it may not exist).
+[31m│[0m [0mDetails:
+[31m│[0m [0m[
+[31m│[0m [0m  {
+[31m│[0m [0m    "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+[31m│[0m [0m    "domain": "iam.googleapis.com",
+[31m│[0m [0m    "metadata": {
+[31m│[0m [0m      "permission": "iam.serviceAccounts.create"
+[31m│[0m [0m    },
+[31m│[0m [0m    "reason": "IAM_PERMISSION_DENIED"
+[31m│[0m [0m  }
+[31m│[0m [0m]
+[31m│[0m [0m, forbidden[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_service_account.backend_sa,
+[31m│[0m [0m  on main.tf line 314, in resource "google_service_account" "backend_sa":
+[31m│[0m [0m 314: resource "google_service_account" "backend_sa" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError creating service account: googleapi: Error 403: Permission 'iam.serviceAccounts.create' denied on resource (or it may not exist).
+[31m│[0m [0mDetails:
+[31m│[0m [0m[
+[31m│[0m [0m  {
+[31m│[0m [0m    "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+[31m│[0m [0m    "domain": "iam.googleapis.com",
+[31m│[0m [0m    "metadata": {
+[31m│[0m [0m      "permission": "iam.serviceAccounts.create"
+[31m│[0m [0m    },
+[31m│[0m [0m    "reason": "IAM_PERMISSION_DENIED"
+[31m│[0m [0m  }
+[31m│[0m [0m]
+[31m│[0m [0m, forbidden[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_service_account.bastion_sa,
+[31m│[0m [0m  on main.tf line 358, in resource "google_service_account" "bastion_sa":
+[31m│[0m [0m 358: resource "google_service_account" "bastion_sa" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError creating Address: googleapi: Error 403: Required 'compute.addresses.create' permission for 'projects/project-84d8bfc9-cd8e-4b3c-b15/regions/asia-south2/addresses/bastion-ip', forbidden[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_compute_address.bastion_ip,
+[31m│[0m [0m  on main.tf line 373, in resource "google_compute_address" "bastion_ip":
+[31m│[0m [0m 373: resource "google_compute_address" "bastion_ip" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+
+Terraform will perform the following actions:
+
+[1m  # google_artifact_registry_repository.docker_repo[0m will be created
+[0m  [32m+[0m[0m resource "google_artifact_registry_repository" "docker_repo" {
+      [32m+[0m[0m create_time      = (known after apply)
+      [32m+[0m[0m effective_labels = (known after apply)
+      [32m+[0m[0m format           = "DOCKER"
+      [32m+[0m[0m id               = (known after apply)
+      [32m+[0m[0m location         = "asia-south2"
+      [32m+[0m[0m mode             = "STANDARD_REPOSITORY"
+      [32m+[0m[0m name             = (known after apply)
+      [32m+[0m[0m project          = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m repository_id    = "dot-net-repo"
+      [32m+[0m[0m terraform_labels = (known after apply)
+      [32m+[0m[0m update_time      = (known after apply)
+    }
+
+[1m  # google_compute_address.bastion_ip[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_address" "bastion_ip" {
+      [32m+[0m[0m address            = (known after apply)
+      [32m+[0m[0m address_type       = "EXTERNAL"
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m effective_labels   = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m label_fingerprint  = (known after apply)
+      [32m+[0m[0m name               = "bastion-ip"
+      [32m+[0m[0m network_tier       = (known after apply)
+      [32m+[0m[0m prefix_length      = (known after apply)
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose            = (known after apply)
+      [32m+[0m[0m region             = (known after apply)
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m subnetwork         = (known after apply)
+      [32m+[0m[0m terraform_labels   = (known after apply)
+      [32m+[0m[0m users              = (known after apply)
+    }
+
+[1m  # google_compute_firewall.allow_http[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_http" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-http-https"
+      [32m+[0m[0m network            = "dot-net-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "0.0.0.0/0",
+        ]
+      [32m+[0m[0m target_tags        = [
+          [32m+[0m[0m "bastion",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "80",
+              [32m+[0m[0m "443",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+    }
+
+[1m  # google_compute_firewall.allow_internal[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_internal" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-internal"
+      [32m+[0m[0m network            = "dot-net-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "10.0.0.0/16",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "0-65535",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "0-65535",
+            ]
+          [32m+[0m[0m protocol = "udp"
+        }
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = []
+          [32m+[0m[0m protocol = "icmp"
+        }
+    }
+
+[1m  # google_compute_firewall.allow_ssh[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_firewall" "allow_ssh" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m destination_ranges = (known after apply)
+      [32m+[0m[0m direction          = (known after apply)
+      [32m+[0m[0m enable_logging     = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "allow-ssh"
+      [32m+[0m[0m network            = "dot-net-vpc"
+      [32m+[0m[0m priority           = 1000
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m source_ranges      = [
+          [32m+[0m[0m "0.0.0.0/0",
+        ]
+      [32m+[0m[0m target_tags        = [
+          [32m+[0m[0m "bastion",
+        ]
+
+      [32m+[0m[0m allow {
+          [32m+[0m[0m ports    = [
+              [32m+[0m[0m "22",
+            ]
+          [32m+[0m[0m protocol = "tcp"
+        }
+    }
+
+[1m  # google_compute_global_address.private_ip_range[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_global_address" "private_ip_range" {
+      [32m+[0m[0m address            = (known after apply)
+      [32m+[0m[0m address_type       = "INTERNAL"
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m effective_labels   = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m label_fingerprint  = (known after apply)
+      [32m+[0m[0m name               = "private-ip-range"
+      [32m+[0m[0m network            = (known after apply)
+      [32m+[0m[0m prefix_length      = 16
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose            = "VPC_PEERING"
+      [32m+[0m[0m self_link          = (known after apply)
+      [32m+[0m[0m terraform_labels   = (known after apply)
+    }
+
+[1m  # google_compute_instance.bastion[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_instance" "bastion" {
+      [32m+[0m[0m can_ip_forward          = false
+      [32m+[0m[0m cpu_platform            = (known after apply)
+      [32m+[0m[0m current_status          = (known after apply)
+      [32m+[0m[0m deletion_protection     = false
+      [32m+[0m[0m effective_labels        = (known after apply)
+      [32m+[0m[0m guest_accelerator       = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m instance_id             = (known after apply)
+      [32m+[0m[0m label_fingerprint       = (known after apply)
+      [32m+[0m[0m machine_type            = "e2-small"
+      [32m+[0m[0m metadata_fingerprint    = (known after apply)
+      [32m+[0m[0m metadata_startup_script = <<-EOT
+            #!/bin/bash
+                
+                # Update system
+                apt-get update
+                apt-get install -y apt-transport-https ca-certificates curl software-properties-common nginx
+                
+                # Install Docker
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+                add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+                apt-get update
+                apt-get install -y docker-ce docker-ce-cli containerd.io
+                
+                # Install kubectl
+                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+                
+                # Install gcloud
+                echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+                curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+                apt-get update && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin
+                
+                # Configure kubectl to connect to GKE
+                gcloud container clusters get-credentials private-gke-cluster --region=asia-south2
+                
+                # Configure Nginx as reverse proxy
+                cat > /etc/nginx/sites-available/default <<'NGINX'
+                server {
+                    listen 80 default_server;
+                    server_name _;
+            
+                    # Proxy frontend
+                    location / {
+                        proxy_pass http://10.0.2.9/;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    }
+            
+                    # Proxy backend API
+                    location /api/ {
+                        proxy_pass http://10.0.2.9/api/;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    }
+                }
+            NGINX
+                
+                systemctl restart nginx
+                systemctl enable nginx
+        EOT
+      [32m+[0m[0m min_cpu_platform        = (known after apply)
+      [32m+[0m[0m name                    = "dot-net-bastion-vm"
+      [32m+[0m[0m project                 = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link               = (known after apply)
+      [32m+[0m[0m tags                    = [
+          [32m+[0m[0m "bastion",
+        ]
+      [32m+[0m[0m tags_fingerprint        = (known after apply)
+      [32m+[0m[0m terraform_labels        = (known after apply)
+      [32m+[0m[0m zone                    = "asia-south2-b"
+
+      [32m+[0m[0m boot_disk {
+          [32m+[0m[0m auto_delete                = true
+          [32m+[0m[0m device_name                = (known after apply)
+          [32m+[0m[0m disk_encryption_key_sha256 = (known after apply)
+          [32m+[0m[0m kms_key_self_link          = (known after apply)
+          [32m+[0m[0m mode                       = "READ_WRITE"
+          [32m+[0m[0m source                     = (known after apply)
+
+          [32m+[0m[0m initialize_params {
+              [32m+[0m[0m image                  = "ubuntu-os-cloud/ubuntu-2204-lts"
+              [32m+[0m[0m labels                 = (known after apply)
+              [32m+[0m[0m provisioned_iops       = (known after apply)
+              [32m+[0m[0m provisioned_throughput = (known after apply)
+              [32m+[0m[0m size                   = 20
+              [32m+[0m[0m type                   = (known after apply)
+            }
+        }
+
+      [32m+[0m[0m confidential_instance_config (known after apply)
+
+      [32m+[0m[0m network_interface {
+          [32m+[0m[0m internal_ipv6_prefix_length = (known after apply)
+          [32m+[0m[0m ipv6_access_type            = (known after apply)
+          [32m+[0m[0m ipv6_address                = (known after apply)
+          [32m+[0m[0m name                        = (known after apply)
+          [32m+[0m[0m network                     = "dot-net-vpc"
+          [32m+[0m[0m network_ip                  = (known after apply)
+          [32m+[0m[0m stack_type                  = (known after apply)
+          [32m+[0m[0m subnetwork                  = "public-subnet"
+          [32m+[0m[0m subnetwork_project          = (known after apply)
+
+          [32m+[0m[0m access_config {
+              [32m+[0m[0m nat_ip       = (known after apply)
+              [32m+[0m[0m network_tier = (known after apply)
+            }
+        }
+
+      [32m+[0m[0m reservation_affinity (known after apply)
+
+      [32m+[0m[0m scheduling (known after apply)
+
+      [32m+[0m[0m service_account {
+          [32m+[0m[0m email  = (known after apply)
+          [32m+[0m[0m scopes = [
+              [32m+[0m[0m "https://www.googleapis.com/auth/cloud-platform",
+            ]
+        }
+    }
+
+[1m  # google_compute_network.vpc[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_network" "vpc" {
+      [32m+[0m[0m auto_create_subnetworks                   = false
+      [32m+[0m[0m delete_default_routes_on_create           = false
+      [32m+[0m[0m gateway_ipv4                              = (known after apply)
+      [32m+[0m[0m id                                        = (known after apply)
+      [32m+[0m[0m internal_ipv6_range                       = (known after apply)
+      [32m+[0m[0m mtu                                       = (known after apply)
+      [32m+[0m[0m name                                      = "dot-net-vpc"
+      [32m+[0m[0m network_firewall_policy_enforcement_order = "AFTER_CLASSIC_FIREWALL"
+      [32m+[0m[0m numeric_id                                = (known after apply)
+      [32m+[0m[0m project                                   = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m routing_mode                              = (known after apply)
+      [32m+[0m[0m self_link                                 = (known after apply)
+    }
+
+[1m  # google_compute_router.router[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_router" "router" {
+      [32m+[0m[0m creation_timestamp = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m name               = "dot-net-router"
+      [32m+[0m[0m network            = (known after apply)
+      [32m+[0m[0m project            = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m region             = "asia-south2"
+      [32m+[0m[0m self_link          = (known after apply)
+    }
+
+[1m  # google_compute_router_nat.nat[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_router_nat" "nat" {
+      [32m+[0m[0m auto_network_tier                   = (known after apply)
+      [32m+[0m[0m enable_dynamic_port_allocation      = (known after apply)
+      [32m+[0m[0m enable_endpoint_independent_mapping = (known after apply)
+      [32m+[0m[0m endpoint_types                      = (known after apply)
+      [32m+[0m[0m icmp_idle_timeout_sec               = 30
+      [32m+[0m[0m id                                  = (known after apply)
+      [32m+[0m[0m min_ports_per_vm                    = (known after apply)
+      [32m+[0m[0m name                                = "dot-net-nat"
+      [32m+[0m[0m nat_ip_allocate_option              = "AUTO_ONLY"
+      [32m+[0m[0m project                             = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m region                              = "asia-south2"
+      [32m+[0m[0m router                              = "dot-net-router"
+      [32m+[0m[0m source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+      [32m+[0m[0m tcp_established_idle_timeout_sec    = 1200
+      [32m+[0m[0m tcp_time_wait_timeout_sec           = 120
+      [32m+[0m[0m tcp_transitory_idle_timeout_sec     = 30
+      [32m+[0m[0m udp_idle_timeout_sec                = 30
+    }
+
+[1m  # google_compute_subnetwork.private_subnet[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_subnetwork" "private_subnet" {
+      [32m+[0m[0m creation_timestamp         = (known after apply)
+      [32m+[0m[0m external_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m fingerprint                = (known after apply)
+      [32m+[0m[0m gateway_address            = (known after apply)
+      [32m+[0m[0m id                         = (known after apply)
+      [32m+[0m[0m internal_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m ip_cidr_range              = "10.0.1.0/24"
+      [32m+[0m[0m ipv6_cidr_range            = (known after apply)
+      [32m+[0m[0m name                       = "private-subnet"
+      [32m+[0m[0m network                    = (known after apply)
+      [32m+[0m[0m private_ip_google_access   = true
+      [32m+[0m[0m private_ipv6_google_access = (known after apply)
+      [32m+[0m[0m project                    = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose                    = (known after apply)
+      [32m+[0m[0m region                     = "asia-south2"
+      [32m+[0m[0m secondary_ip_range         = (known after apply)
+      [32m+[0m[0m self_link                  = (known after apply)
+      [32m+[0m[0m stack_type                 = (known after apply)
+    }
+
+[1m  # google_compute_subnetwork.public_subnet[0m will be created
+[0m  [32m+[0m[0m resource "google_compute_subnetwork" "public_subnet" {
+      [32m+[0m[0m creation_timestamp         = (known after apply)
+      [32m+[0m[0m external_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m fingerprint                = (known after apply)
+      [32m+[0m[0m gateway_address            = (known after apply)
+      [32m+[0m[0m id                         = (known after apply)
+      [32m+[0m[0m internal_ipv6_prefix       = (known after apply)
+      [32m+[0m[0m ip_cidr_range              = "10.0.2.0/24"
+      [32m+[0m[0m ipv6_cidr_range            = (known after apply)
+      [32m+[0m[0m name                       = "public-subnet"
+      [32m+[0m[0m network                    = (known after apply)
+      [32m+[0m[0m private_ip_google_access   = (known after apply)
+      [32m+[0m[0m private_ipv6_google_access = (known after apply)
+      [32m+[0m[0m project                    = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m purpose                    = (known after apply)
+      [32m+[0m[0m region                     = "asia-south2"
+      [32m+[0m[0m secondary_ip_range         = (known after apply)
+      [32m+[0m[0m self_link                  = (known after apply)
+      [32m+[0m[0m stack_type                 = (known after apply)
+    }
+
+[1m  # google_container_cluster.primary[0m will be created
+[0m  [32m+[0m[0m resource "google_container_cluster" "primary" {
+      [32m+[0m[0m cluster_ipv4_cidr                        = (known after apply)
+      [32m+[0m[0m datapath_provider                        = (known after apply)
+      [32m+[0m[0m default_max_pods_per_node                = (known after apply)
+      [32m+[0m[0m deletion_protection                      = true
+      [32m+[0m[0m enable_cilium_clusterwide_network_policy = false
+      [32m+[0m[0m enable_intranode_visibility              = (known after apply)
+      [32m+[0m[0m enable_kubernetes_alpha                  = false
+      [32m+[0m[0m enable_l4_ilb_subsetting                 = false
+      [32m+[0m[0m enable_legacy_abac                       = false
+      [32m+[0m[0m enable_multi_networking                  = false
+      [32m+[0m[0m enable_shielded_nodes                    = true
+      [32m+[0m[0m endpoint                                 = (known after apply)
+      [32m+[0m[0m id                                       = (known after apply)
+      [32m+[0m[0m initial_node_count                       = 1
+      [32m+[0m[0m label_fingerprint                        = (known after apply)
+      [32m+[0m[0m location                                 = "asia-south2"
+      [32m+[0m[0m logging_service                          = (known after apply)
+      [32m+[0m[0m master_version                           = (known after apply)
+      [32m+[0m[0m monitoring_service                       = (known after apply)
+      [32m+[0m[0m name                                     = "private-gke-cluster"
+      [32m+[0m[0m network                                  = "dot-net-vpc"
+      [32m+[0m[0m networking_mode                          = (known after apply)
+      [32m+[0m[0m node_locations                           = (known after apply)
+      [32m+[0m[0m node_version                             = (known after apply)
+      [32m+[0m[0m operation                                = (known after apply)
+      [32m+[0m[0m private_ipv6_google_access               = (known after apply)
+      [32m+[0m[0m project                                  = (known after apply)
+      [32m+[0m[0m remove_default_node_pool                 = true
+      [32m+[0m[0m self_link                                = (known after apply)
+      [32m+[0m[0m services_ipv4_cidr                       = (known after apply)
+      [32m+[0m[0m subnetwork                               = "private-subnet"
+      [32m+[0m[0m tpu_ipv4_cidr_block                      = (known after apply)
+
+      [32m+[0m[0m addons_config {
+          [32m+[0m[0m cloudrun_config (known after apply)
+          [32m+[0m[0m config_connector_config (known after apply)
+          [32m+[0m[0m dns_cache_config (known after apply)
+          [32m+[0m[0m gce_persistent_disk_csi_driver_config (known after apply)
+          [32m+[0m[0m gcp_filestore_csi_driver_config (known after apply)
+          [32m+[0m[0m gcs_fuse_csi_driver_config (known after apply)
+          [32m+[0m[0m gke_backup_agent_config (known after apply)
+          [32m+[0m[0m horizontal_pod_autoscaling (known after apply)
+          [32m+[0m[0m http_load_balancing {
+              [32m+[0m[0m disabled = false
+            }
+          [32m+[0m[0m network_policy_config (known after apply)
+          [32m+[0m[0m ray_operator_config (known after apply)
+          [32m+[0m[0m stateful_ha_config (known after apply)
+        }
+
+      [32m+[0m[0m authenticator_groups_config (known after apply)
+
+      [32m+[0m[0m cluster_autoscaling (known after apply)
+
+      [32m+[0m[0m confidential_nodes (known after apply)
+
+      [32m+[0m[0m cost_management_config (known after apply)
+
+      [32m+[0m[0m database_encryption (known after apply)
+
+      [32m+[0m[0m default_snat_status (known after apply)
+
+      [32m+[0m[0m gateway_api_config (known after apply)
+
+      [32m+[0m[0m identity_service_config (known after apply)
+
+      [32m+[0m[0m ip_allocation_policy {
+          [32m+[0m[0m cluster_ipv4_cidr_block       = "10.4.0.0/14"
+          [32m+[0m[0m cluster_secondary_range_name  = (known after apply)
+          [32m+[0m[0m services_ipv4_cidr_block      = "10.8.0.0/20"
+          [32m+[0m[0m services_secondary_range_name = (known after apply)
+          [32m+[0m[0m stack_type                    = "IPV4"
+
+          [32m+[0m[0m pod_cidr_overprovision_config (known after apply)
+        }
+
+      [32m+[0m[0m logging_config (known after apply)
+
+      [32m+[0m[0m master_auth (known after apply)
+
+      [32m+[0m[0m master_authorized_networks_config {
+          [32m+[0m[0m gcp_public_cidrs_access_enabled = (known after apply)
+
+          [32m+[0m[0m cidr_blocks {
+              [32m+[0m[0m cidr_block   = "10.0.2.0/24"
+              [32m+[0m[0m display_name = "bastion-subnet"
+            }
+        }
+
+      [32m+[0m[0m mesh_certificates (known after apply)
+
+      [32m+[0m[0m monitoring_config (known after apply)
+
+      [32m+[0m[0m node_config (known after apply)
+
+      [32m+[0m[0m node_pool (known after apply)
+
+      [32m+[0m[0m node_pool_auto_config (known after apply)
+
+      [32m+[0m[0m node_pool_defaults (known after apply)
+
+      [32m+[0m[0m notification_config (known after apply)
+
+      [32m+[0m[0m private_cluster_config {
+          [32m+[0m[0m enable_private_endpoint = true
+          [32m+[0m[0m enable_private_nodes    = true
+          [32m+[0m[0m master_ipv4_cidr_block  = "172.16.0.0/28"
+          [32m+[0m[0m peering_name            = (known after apply)
+          [32m+[0m[0m private_endpoint        = (known after apply)
+          [32m+[0m[0m public_endpoint         = (known after apply)
+
+          [32m+[0m[0m master_global_access_config (known after apply)
+        }
+
+      [32m+[0m[0m release_channel (known after apply)
+
+      [32m+[0m[0m security_posture_config (known after apply)
+
+      [32m+[0m[0m service_external_ips_config (known after apply)
+
+      [32m+[0m[0m vertical_pod_autoscaling (known after apply)
+
+      [32m+[0m[0m workload_identity_config {
+          [32m+[0m[0m workload_pool = "project-84d8bfc9-cd8e-4b3c-b15.svc.id.goog"
+        }
+    }
+
+[1m  # google_container_node_pool.primary_nodes[0m will be created
+[0m  [32m+[0m[0m resource "google_container_node_pool" "primary_nodes" {
+      [32m+[0m[0m cluster                     = "private-gke-cluster"
+      [32m+[0m[0m id                          = (known after apply)
+      [32m+[0m[0m initial_node_count          = (known after apply)
+      [32m+[0m[0m instance_group_urls         = (known after apply)
+      [32m+[0m[0m location                    = "asia-south2"
+      [32m+[0m[0m managed_instance_group_urls = (known after apply)
+      [32m+[0m[0m max_pods_per_node           = (known after apply)
+      [32m+[0m[0m name                        = "default-pool"
+      [32m+[0m[0m name_prefix                 = (known after apply)
+      [32m+[0m[0m node_count                  = 2
+      [32m+[0m[0m node_locations              = (known after apply)
+      [32m+[0m[0m operation                   = (known after apply)
+      [32m+[0m[0m project                     = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m version                     = (known after apply)
+
+      [32m+[0m[0m autoscaling {
+          [32m+[0m[0m location_policy = (known after apply)
+          [32m+[0m[0m max_node_count  = 4
+          [32m+[0m[0m min_node_count  = 2
+        }
+
+      [32m+[0m[0m management (known after apply)
+
+      [32m+[0m[0m network_config (known after apply)
+
+      [32m+[0m[0m node_config {
+          [32m+[0m[0m disk_size_gb      = 20
+          [32m+[0m[0m disk_type         = "pd-standard"
+          [32m+[0m[0m effective_taints  = (known after apply)
+          [32m+[0m[0m guest_accelerator = (known after apply)
+          [32m+[0m[0m image_type        = (known after apply)
+          [32m+[0m[0m labels            = (known after apply)
+          [32m+[0m[0m local_ssd_count   = (known after apply)
+          [32m+[0m[0m logging_variant   = (known after apply)
+          [32m+[0m[0m machine_type      = "e2-medium"
+          [32m+[0m[0m metadata          = (known after apply)
+          [32m+[0m[0m min_cpu_platform  = (known after apply)
+          [32m+[0m[0m oauth_scopes      = [
+              [32m+[0m[0m "https://www.googleapis.com/auth/cloud-platform",
+            ]
+          [32m+[0m[0m preemptible       = false
+          [32m+[0m[0m service_account   = (known after apply)
+          [32m+[0m[0m spot              = false
+          [32m+[0m[0m tags              = [
+              [32m+[0m[0m "gke-node",
+            ]
+
+          [32m+[0m[0m confidential_nodes (known after apply)
+
+          [32m+[0m[0m gcfs_config (known after apply)
+
+          [32m+[0m[0m kubelet_config (known after apply)
+
+          [32m+[0m[0m shielded_instance_config (known after apply)
+
+          [32m+[0m[0m workload_metadata_config {
+              [32m+[0m[0m mode = "GKE_METADATA"
+            }
+        }
+
+      [32m+[0m[0m upgrade_settings (known after apply)
+    }
+
+[1m  # google_project_iam_member.backend_cloudsql[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "backend_cloudsql" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m role    = "roles/cloudsql.client"
+    }
+
+[1m  # google_project_iam_member.backend_redis[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "backend_redis" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m role    = "roles/redis.editor"
+    }
+
+[1m  # google_project_iam_member.bastion_gke[0m will be created
+[0m  [32m+[0m[0m resource "google_project_iam_member" "bastion_gke" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m role    = "roles/container.developer"
+    }
+
+[1m  # google_pubsub_subscription.subscription[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_subscription" "subscription" {
+      [32m+[0m[0m ack_deadline_seconds       = 20
+      [32m+[0m[0m effective_labels           = (known after apply)
+      [32m+[0m[0m id                         = (known after apply)
+      [32m+[0m[0m message_retention_duration = "604800s"
+      [32m+[0m[0m name                       = "dot-net-sub"
+      [32m+[0m[0m project                    = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m terraform_labels           = (known after apply)
+      [32m+[0m[0m topic                      = "dot-net-topic"
+
+      [32m+[0m[0m expiration_policy (known after apply)
+
+      [32m+[0m[0m retry_policy {
+          [32m+[0m[0m maximum_backoff = "600s"
+          [32m+[0m[0m minimum_backoff = "10s"
+        }
+    }
+
+[1m  # google_pubsub_subscription_iam_member.backend_pubsub_subscriber[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_subscription_iam_member" "backend_pubsub_subscriber" {
+      [32m+[0m[0m etag         = (known after apply)
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = (known after apply)
+      [32m+[0m[0m project      = (known after apply)
+      [32m+[0m[0m role         = "roles/pubsub.subscriber"
+      [32m+[0m[0m subscription = "dot-net-sub"
+    }
+
+[1m  # google_pubsub_topic.topic[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_topic" "topic" {
+      [32m+[0m[0m effective_labels = (known after apply)
+      [32m+[0m[0m id               = (known after apply)
+      [32m+[0m[0m name             = "dot-net-topic"
+      [32m+[0m[0m project          = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m terraform_labels = (known after apply)
+
+      [32m+[0m[0m message_storage_policy (known after apply)
+
+      [32m+[0m[0m schema_settings (known after apply)
+    }
+
+[1m  # google_pubsub_topic_iam_member.backend_pubsub_publisher[0m will be created
+[0m  [32m+[0m[0m resource "google_pubsub_topic_iam_member" "backend_pubsub_publisher" {
+      [32m+[0m[0m etag    = (known after apply)
+      [32m+[0m[0m id      = (known after apply)
+      [32m+[0m[0m member  = (known after apply)
+      [32m+[0m[0m project = (known after apply)
+      [32m+[0m[0m role    = "roles/pubsub.publisher"
+      [32m+[0m[0m topic   = "dot-net-topic"
+    }
+
+[1m  # google_redis_instance.redis[0m will be created
+[0m  [32m+[0m[0m resource "google_redis_instance" "redis" {
+      [32m+[0m[0m alternative_location_id  = (known after apply)
+      [32m+[0m[0m auth_enabled             = false
+      [32m+[0m[0m auth_string              = (sensitive value)
+      [32m+[0m[0m authorized_network       = (known after apply)
+      [32m+[0m[0m connect_mode             = "DIRECT_PEERING"
+      [32m+[0m[0m create_time              = (known after apply)
+      [32m+[0m[0m current_location_id      = (known after apply)
+      [32m+[0m[0m effective_labels         = (known after apply)
+      [32m+[0m[0m host                     = (known after apply)
+      [32m+[0m[0m id                       = (known after apply)
+      [32m+[0m[0m location_id              = (known after apply)
+      [32m+[0m[0m maintenance_schedule     = (known after apply)
+      [32m+[0m[0m maintenance_version      = (known after apply)
+      [32m+[0m[0m memory_size_gb           = 1
+      [32m+[0m[0m name                     = "dot-net-redis"
+      [32m+[0m[0m nodes                    = (known after apply)
+      [32m+[0m[0m persistence_iam_identity = (known after apply)
+      [32m+[0m[0m port                     = (known after apply)
+      [32m+[0m[0m project                  = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m read_endpoint            = (known after apply)
+      [32m+[0m[0m read_endpoint_port       = (known after apply)
+      [32m+[0m[0m read_replicas_mode       = (known after apply)
+      [32m+[0m[0m redis_version            = "REDIS_7_0"
+      [32m+[0m[0m region                   = "asia-south2"
+      [32m+[0m[0m replica_count            = (known after apply)
+      [32m+[0m[0m reserved_ip_range        = (known after apply)
+      [32m+[0m[0m secondary_ip_range       = (known after apply)
+      [32m+[0m[0m server_ca_certs          = (known after apply)
+      [32m+[0m[0m terraform_labels         = (known after apply)
+      [32m+[0m[0m tier                     = "BASIC"
+      [32m+[0m[0m transit_encryption_mode  = "DISABLED"
+
+      [32m+[0m[0m persistence_config (known after apply)
+    }
+
+[1m  # google_service_account.backend_sa[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account" "backend_sa" {
+      [32m+[0m[0m account_id   = "backend-gke-sa"
+      [32m+[0m[0m disabled     = false
+      [32m+[0m[0m display_name = "Backend GKE Service Account"
+      [32m+[0m[0m email        = (known after apply)
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = (known after apply)
+      [32m+[0m[0m name         = (known after apply)
+      [32m+[0m[0m project      = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m unique_id    = (known after apply)
+    }
+
+[1m  # google_service_account.bastion_sa[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account" "bastion_sa" {
+      [32m+[0m[0m account_id   = "bastion-sa"
+      [32m+[0m[0m disabled     = false
+      [32m+[0m[0m display_name = "Bastion VM Service Account"
+      [32m+[0m[0m email        = (known after apply)
+      [32m+[0m[0m id           = (known after apply)
+      [32m+[0m[0m member       = (known after apply)
+      [32m+[0m[0m name         = (known after apply)
+      [32m+[0m[0m project      = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m unique_id    = (known after apply)
+    }
+
+[1m  # google_service_account_iam_member.backend_workload_identity[0m will be created
+[0m  [32m+[0m[0m resource "google_service_account_iam_member" "backend_workload_identity" {
+      [32m+[0m[0m etag               = (known after apply)
+      [32m+[0m[0m id                 = (known after apply)
+      [32m+[0m[0m member             = "serviceAccount:project-84d8bfc9-cd8e-4b3c-b15.svc.id.goog[default/backend-sa]"
+      [32m+[0m[0m role               = "roles/iam.workloadIdentityUser"
+      [32m+[0m[0m service_account_id = (known after apply)
+    }
+
+[1m  # google_service_networking_connection.private_vpc_connection[0m will be created
+[0m  [32m+[0m[0m resource "google_service_networking_connection" "private_vpc_connection" {
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m network                 = (known after apply)
+      [32m+[0m[0m peering                 = (known after apply)
+      [32m+[0m[0m reserved_peering_ranges = [
+          [32m+[0m[0m "private-ip-range",
+        ]
+      [32m+[0m[0m service                 = "servicenetworking.googleapis.com"
+    }
+
+[1m  # google_sql_database.database[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_database" "database" {
+      [32m+[0m[0m charset         = (known after apply)
+      [32m+[0m[0m collation       = (known after apply)
+      [32m+[0m[0m deletion_policy = "DELETE"
+      [32m+[0m[0m id              = (known after apply)
+      [32m+[0m[0m instance        = "dot-net-postgres"
+      [32m+[0m[0m name            = "dotnetdb"
+      [32m+[0m[0m project         = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m self_link       = (known after apply)
+    }
+
+[1m  # google_sql_database_instance.postgres[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_database_instance" "postgres" {
+      [32m+[0m[0m available_maintenance_versions = (known after apply)
+      [32m+[0m[0m connection_name                = (known after apply)
+      [32m+[0m[0m database_version               = "POSTGRES_15"
+      [32m+[0m[0m deletion_protection            = false
+      [32m+[0m[0m dns_name                       = (known after apply)
+      [32m+[0m[0m encryption_key_name            = (known after apply)
+      [32m+[0m[0m first_ip_address               = (known after apply)
+      [32m+[0m[0m id                             = (known after apply)
+      [32m+[0m[0m instance_type                  = (known after apply)
+      [32m+[0m[0m ip_address                     = (known after apply)
+      [32m+[0m[0m maintenance_version            = (known after apply)
+      [32m+[0m[0m master_instance_name           = (known after apply)
+      [32m+[0m[0m name                           = "dot-net-postgres"
+      [32m+[0m[0m private_ip_address             = (known after apply)
+      [32m+[0m[0m project                        = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m psc_service_attachment_link    = (known after apply)
+      [32m+[0m[0m public_ip_address              = (known after apply)
+      [32m+[0m[0m region                         = "asia-south2"
+      [32m+[0m[0m self_link                      = (known after apply)
+      [32m+[0m[0m server_ca_cert                 = (sensitive value)
+      [32m+[0m[0m service_account_email_address  = (known after apply)
+
+      [32m+[0m[0m replica_configuration (known after apply)
+
+      [32m+[0m[0m settings {
+          [32m+[0m[0m activation_policy     = "ALWAYS"
+          [32m+[0m[0m availability_type     = "ZONAL"
+          [32m+[0m[0m connector_enforcement = (known after apply)
+          [32m+[0m[0m disk_autoresize       = true
+          [32m+[0m[0m disk_autoresize_limit = 0
+          [32m+[0m[0m disk_size             = 10
+          [32m+[0m[0m disk_type             = "PD_SSD"
+          [32m+[0m[0m edition               = "ENTERPRISE"
+          [32m+[0m[0m pricing_plan          = "PER_USE"
+          [32m+[0m[0m tier                  = "db-f1-micro"
+          [32m+[0m[0m user_labels           = (known after apply)
+          [32m+[0m[0m version               = (known after apply)
+
+          [32m+[0m[0m backup_configuration {
+              [32m+[0m[0m enabled                        = false
+              [32m+[0m[0m start_time                     = (known after apply)
+              [32m+[0m[0m transaction_log_retention_days = (known after apply)
+
+              [32m+[0m[0m backup_retention_settings (known after apply)
+            }
+
+          [32m+[0m[0m insights_config (known after apply)
+
+          [32m+[0m[0m ip_configuration {
+              [32m+[0m[0m ipv4_enabled    = false
+              [32m+[0m[0m private_network = (known after apply)
+              [32m+[0m[0m server_ca_mode  = (known after apply)
+              [32m+[0m[0m ssl_mode        = (known after apply)
+            }
+
+          [32m+[0m[0m location_preference (known after apply)
+        }
+    }
+
+[1m  # google_sql_user.postgres_user[0m will be created
+[0m  [32m+[0m[0m resource "google_sql_user" "postgres_user" {
+      [32m+[0m[0m host                    = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m instance                = "dot-net-postgres"
+      [32m+[0m[0m name                    = "postgres"
+      [32m+[0m[0m password                = (sensitive value)
+      [32m+[0m[0m project                 = "project-84d8bfc9-cd8e-4b3c-b15"
+      [32m+[0m[0m sql_server_user_details = (known after apply)
+    }
+
+[1m  # google_storage_bucket.bucket[0m will be created
+[0m  [32m+[0m[0m resource "google_storage_bucket" "bucket" {
+      [32m+[0m[0m effective_labels            = (known after apply)
+      [32m+[0m[0m force_destroy               = true
+      [32m+[0m[0m id                          = (known after apply)
+      [32m+[0m[0m location                    = "ASIA-SOUTH2"
+      [32m+[0m[0m name                        = "dot-net-bucket"
+      [32m+[0m[0m project                     = (known after apply)
+      [32m+[0m[0m project_number              = (known after apply)
+      [32m+[0m[0m public_access_prevention    = (known after apply)
+      [32m+[0m[0m rpo                         = (known after apply)
+      [32m+[0m[0m self_link                   = (known after apply)
+      [32m+[0m[0m storage_class               = "STANDARD"
+      [32m+[0m[0m terraform_labels            = (known after apply)
+      [32m+[0m[0m uniform_bucket_level_access = true
+      [32m+[0m[0m url                         = (known after apply)
+
+      [32m+[0m[0m cors {
+          [32m+[0m[0m max_age_seconds = 3600
+          [32m+[0m[0m method          = [
+              [32m+[0m[0m "GET",
+              [32m+[0m[0m "HEAD",
+              [32m+[0m[0m "PUT",
+              [32m+[0m[0m "POST",
+              [32m+[0m[0m "DELETE",
+            ]
+          [32m+[0m[0m origin          = [
+              [32m+[0m[0m "*",
+            ]
+          [32m+[0m[0m response_header = [
+              [32m+[0m[0m "*",
+            ]
+        }
+
+      [32m+[0m[0m soft_delete_policy (known after apply)
+
+      [32m+[0m[0m versioning (known after apply)
+
+      [32m+[0m[0m website (known after apply)
+    }
+
+[1m  # google_storage_bucket_iam_member.backend_storage[0m will be created
+[0m  [32m+[0m[0m resource "google_storage_bucket_iam_member" "backend_storage" {
+      [32m+[0m[0m bucket = "dot-net-bucket"
+      [32m+[0m[0m etag   = (known after apply)
+      [32m+[0m[0m id     = (known after apply)
+      [32m+[0m[0m member = (known after apply)
+      [32m+[0m[0m role   = "roles/storage.objectAdmin"
+    }
+
+[1mPlan:[0m 31 to add, 0 to change, 0 to destroy.
+[0m
+Changes to Outputs:
+  [32m+[0m[0m artifact_registry_repository = (known after apply)
+  [32m+[0m[0m backend_service_account      = (known after apply)
+  [32m+[0m[0m bastion_external_ip          = (known after apply)
+  [32m+[0m[0m bastion_service_account      = (known after apply)
+  [32m+[0m[0m cloudsql_private_ip          = (known after apply)
+  [32m+[0m[0m gke_cluster_endpoint         = (sensitive value)
+  [32m+[0m[0m redis_host                   = (known after apply)
+  [32m+[0m[0m redis_port                   = (known after apply)
+[0m[1mgoogle_service_account.backend_sa: Creating...[0m[0m
+[0m[1mgoogle_service_account.bastion_sa: Creating...[0m[0m
+[0m[1mgoogle_compute_network.vpc: Creating...[0m[0m
+[0m[1mgoogle_pubsub_topic.topic: Creating...[0m[0m
+[0m[1mgoogle_compute_address.bastion_ip: Creating...[0m[0m
+[0m[1mgoogle_artifact_registry_repository.docker_repo: Creating...[0m[0m
+[0m[1mgoogle_storage_bucket.bucket: Creating...[0m[0m
+[0m[1mgoogle_storage_bucket.bucket: Creation complete after 2s [id=dot-net-bucket][0m
+[0m[1mgoogle_compute_address.bastion_ip: Creation complete after 2s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/regions/asia-south2/addresses/bastion-ip][0m
+[0m[1mgoogle_service_account.backend_sa: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_service_account.bastion_sa: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_network.vpc: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_pubsub_topic.topic: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_artifact_registry_repository.docker_repo: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_artifact_registry_repository.docker_repo: Creation complete after 12s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/locations/asia-south2/repositories/dot-net-repo][0m
+[0m[1mgoogle_pubsub_topic.topic: Creation complete after 13s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/topics/dot-net-topic][0m
+[0m[1mgoogle_pubsub_subscription.subscription: Creating...[0m[0m
+[0m[1mgoogle_service_account.bastion_sa: Creation complete after 14s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/serviceAccounts/bastion-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_project_iam_member.bastion_gke: Creating...[0m[0m
+[0m[1mgoogle_service_account.backend_sa: Creation complete after 16s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/serviceAccounts/backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_project_iam_member.backend_cloudsql: Creating...[0m[0m
+[0m[1mgoogle_storage_bucket_iam_member.backend_storage: Creating...[0m[0m
+[0m[1mgoogle_pubsub_topic_iam_member.backend_pubsub_publisher: Creating...[0m[0m
+[0m[1mgoogle_service_account_iam_member.backend_workload_identity: Creating...[0m[0m
+[0m[1mgoogle_project_iam_member.backend_redis: Creating...[0m[0m
+[0m[1mgoogle_compute_network.vpc: Still creating... [00m20s elapsed][0m[0m
+[0m[1mgoogle_storage_bucket_iam_member.backend_storage: Creation complete after 6s [id=b/dot-net-bucket/roles/storage.objectAdmin/serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_pubsub_subscription.subscription: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_network.vpc: Creation complete after 24s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/global/networks/dot-net-vpc][0m
+[0m[1mgoogle_compute_global_address.private_ip_range: Creating...[0m[0m
+[0m[1mgoogle_compute_subnetwork.private_subnet: Creating...[0m[0m
+[0m[1mgoogle_compute_firewall.allow_ssh: Creating...[0m[0m
+[0m[1mgoogle_compute_firewall.allow_http: Creating...[0m[0m
+[0m[1mgoogle_service_account_iam_member.backend_workload_identity: Creation complete after 8s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/serviceAccounts/backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com/roles/iam.workloadIdentityUser/serviceAccount:project-84d8bfc9-cd8e-4b3c-b15.svc.id.goog[default/backend-sa]][0m
+[0m[1mgoogle_redis_instance.redis: Creating...[0m[0m
+[0m[1mgoogle_project_iam_member.bastion_gke: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_project_iam_member.backend_redis: Creation complete after 10s [id=project-84d8bfc9-cd8e-4b3c-b15/roles/redis.editor/serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_compute_firewall.allow_internal: Creating...[0m[0m
+[0m[1mgoogle_project_iam_member.bastion_gke: Creation complete after 12s [id=project-84d8bfc9-cd8e-4b3c-b15/roles/container.developer/serviceAccount:bastion-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_compute_subnetwork.public_subnet: Creating...[0m[0m
+[0m[1mgoogle_pubsub_topic_iam_member.backend_pubsub_publisher: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_project_iam_member.backend_cloudsql: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_pubsub_topic_iam_member.backend_pubsub_publisher: Creation complete after 11s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/topics/dot-net-topic/roles/pubsub.publisher/serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_compute_router.router: Creating...[0m[0m
+[0m[1mgoogle_project_iam_member.backend_cloudsql: Creation complete after 11s [id=project-84d8bfc9-cd8e-4b3c-b15/roles/cloudsql.client/serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_pubsub_subscription.subscription: Creation complete after 18s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/subscriptions/dot-net-sub][0m
+[0m[1mgoogle_pubsub_subscription_iam_member.backend_pubsub_subscriber: Creating...[0m[0m
+[0m[1mgoogle_compute_global_address.private_ip_range: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_firewall.allow_ssh: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_subnetwork.private_subnet: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_firewall.allow_http: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_firewall.allow_internal: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_subnetwork.public_subnet: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_global_address.private_ip_range: Creation complete after 12s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/global/addresses/private-ip-range][0m
+[0m[1mgoogle_compute_firewall.allow_ssh: Creation complete after 12s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/global/firewalls/allow-ssh][0m
+[0m[1mgoogle_service_networking_connection.private_vpc_connection: Creating...[0m[0m
+[0m[1mgoogle_compute_firewall.allow_http: Creation complete after 12s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/global/firewalls/allow-http-https][0m
+[0m[1mgoogle_compute_router.router: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_firewall.allow_internal: Creation complete after 12s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/global/firewalls/allow-internal][0m
+[0m[1mgoogle_compute_router.router: Creation complete after 13s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/regions/asia-south2/routers/dot-net-router][0m
+[0m[1mgoogle_compute_router_nat.nat: Creating...[0m[0m
+[0m[1mgoogle_pubsub_subscription_iam_member.backend_pubsub_subscriber: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_subnetwork.private_subnet: Still creating... [00m20s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [00m20s elapsed][0m[0m
+[0m[1mgoogle_compute_subnetwork.public_subnet: Still creating... [00m20s elapsed][0m[0m
+[0m[1mgoogle_service_networking_connection.private_vpc_connection: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_subnetwork.private_subnet: Creation complete after 23s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/regions/asia-south2/subnetworks/private-subnet][0m
+[0m[1mgoogle_container_cluster.primary: Creating...[0m[0m
+[0m[1mgoogle_compute_router_nat.nat: Still creating... [00m10s elapsed][0m[0m
+[0m[1mgoogle_compute_subnetwork.public_subnet: Creation complete after 24s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/regions/asia-south2/subnetworks/public-subnet][0m
+[0m[1mgoogle_pubsub_subscription_iam_member.backend_pubsub_subscriber: Creation complete after 20s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/subscriptions/dot-net-sub/roles/pubsub.subscriber/serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com][0m
+[0m[1mgoogle_compute_router_nat.nat: Creation complete after 14s [id=project-84d8bfc9-cd8e-4b3c-b15/asia-south2/dot-net-router/dot-net-nat][0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [00m30s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [00m40s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [00m50s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [01m00s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [01m10s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [01m20s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [01m30s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [01m40s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [01m50s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [02m00s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [02m10s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [02m20s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [02m30s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [02m40s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [02m50s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [03m00s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [03m10s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [03m20s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [03m30s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [03m40s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [03m50s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [04m00s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [04m10s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [04m20s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [04m30s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [04m40s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [04m50s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [05m00s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [05m10s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [05m20s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [05m30s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [05m40s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [05m50s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Still creating... [06m00s elapsed][0m[0m
+[0m[1mgoogle_redis_instance.redis: Creation complete after 6m2s [id=projects/project-84d8bfc9-cd8e-4b3c-b15/locations/asia-south2/instances/dot-net-redis][0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mError waiting for Create Service Networking Connection: Error code 9, message: Cannot modify allocated ranges in CreateConnection. Please use UpdateConnection. Existing allocated IP ranges: [dot-net-vpc-ip-range].
+[31m│[0m [0mHelp Token: Aa5MgssQ36dIecWJKA5U2p7NTm4dgTh1sU5cbMTyvppjpM79fYcxplC0ufNOeUqaFvWCDnjhlHeBXNduf9GMa8WmgYXFI_GZxMk0JM3xtr1P8f20[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_service_networking_connection.private_vpc_connection,
+[31m│[0m [0m  on main.tf line 119, in resource "google_service_networking_connection" "private_vpc_connection":
+[31m│[0m [0m 119: resource "google_service_networking_connection" "private_vpc_connection" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mgoogleapi: Error 403: Insufficient regional quota to satisfy request: resource "SSD_TOTAL_GB": request requires '300.0' and is short '50.0'. project has a quota of '250.0' with '250.0' available. View and manage quotas at https://console.cloud.google.com/iam-admin/quotas?usage=USED&project=project-84d8bfc9-cd8e-4b3c-b15.
+[31m│[0m [0mDetails:
+[31m│[0m [0m[
+[31m│[0m [0m  {
+[31m│[0m [0m    "@type": "type.googleapis.com/google.rpc.RequestInfo",
+[31m│[0m [0m    "requestId": "0xfc7d92e3a7fbb079"
+[31m│[0m [0m  },
+[31m│[0m [0m  {
+[31m│[0m [0m    "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+[31m│[0m [0m    "domain": "container.googleapis.com",
+[31m│[0m [0m    "reason": "INSUFFICIENT_QUOTA_REGIONAL"
+[31m│[0m [0m  }
+[31m│[0m [0m]
+[31m│[0m [0m, forbidden[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with google_container_cluster.primary,
+[31m│[0m [0m  on main.tf line 234, in resource "google_container_cluster" "primary":
+[31m│[0m [0m 234: resource "google_container_cluster" "primary" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m

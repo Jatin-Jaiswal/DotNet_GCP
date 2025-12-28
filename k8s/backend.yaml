@@ -1,0 +1,131 @@
+# ================================================
+# Complete Backend Kubernetes Configuration
+# ================================================
+# Includes: ConfigMap, ServiceAccount, Deployment, and Service
+
+---
+# ConfigMap for Backend Environment Variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  # Cloud SQL PostgreSQL Configuration
+  CloudSql__Host: "10.117.0.3"
+  CloudSql__Database: "dotnetdb"
+  CloudSql__Username: "postgres"
+  CloudSql__Password: "DotNet@123"
+  
+  # Memorystore Redis Configuration
+  Redis__Host: "10.163.53.91"
+  Redis__Port: "6379"
+  
+  # GCP Project Configuration
+  GCP__ProjectId: "project-84d8bfc9-cd8e-4b3c-b15"
+  
+  # Pub/Sub Configuration
+  PubSub__TopicId: "dot-net-topic"
+  PubSub__SubscriptionId: "dot-net-sub"
+  
+  # Cloud Storage Configuration
+  Storage__BucketName: "dot-net-bucket"
+  
+  # ASP.NET Core Configuration
+  ASPNETCORE_URLS: "http://+:8080"
+  ASPNETCORE_ENVIRONMENT: "Production"
+
+---
+# Kubernetes ServiceAccount for Workload Identity
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backend-sa
+  annotations:
+    # Link to GCP service account for Workload Identity
+    iam.gke.io/gcp-service-account: backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+    tier: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: api
+    spec:
+      serviceAccountName: backend-sa
+      
+      containers:
+      - name: backend
+        image: asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:latest
+        
+        ports:
+        - containerPort: 8080
+          name: http
+        
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+---
+# Backend Internal Load Balancer Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  labels:
+    app: backend
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
+    networking.gke.io/internal-load-balancer-subnet: "private-subnet"
+spec:
+  type: LoadBalancer
+  selector:
+    app: backend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800

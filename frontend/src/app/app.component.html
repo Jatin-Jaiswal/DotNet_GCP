@@ -1,0 +1,223 @@
+<!-- 
+  Main application template
+  Single-page layout with all features visible at once
+  Uses Angular Material components for consistent Google-style design
+-->
+
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <h1>{{ title }}</h1>
+    <p class="subtitle">Full-stack application with .NET 6 backend and Angular 20 frontend on GCP</p>
+  </header>
+
+  <!-- Top Section: User Form and File Upload (Side by side) -->
+  <div class="grid-container grid-2-col">
+    
+    <!-- User Creation Form -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Create New User</mat-card-title>
+        <mat-card-subtitle>Data will be saved to Cloud SQL (PostgreSQL)</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="userForm" (ngSubmit)="createUser()">
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Enter full name">
+            <mat-error *ngIf="userForm.get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+            <mat-error *ngIf="userForm.get('name')?.hasError('minlength')">
+              Name must be at least 2 characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="Enter email address">
+            <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+              Please enter a valid email
+            </mat-error>
+          </mat-form-field>
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="userForm.invalid || creatingUser"
+            class="full-width">
+            <mat-icon *ngIf="!creatingUser">person_add</mat-icon>
+            <mat-spinner *ngIf="creatingUser" diameter="20"></mat-spinner>
+            {{ creatingUser ? 'Creating...' : 'Create User' }}
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- File Upload -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Upload File</mat-card-title>
+        <mat-card-subtitle>Files will be stored in Cloud Storage bucket</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="file-upload-container">
+          <input 
+            type="file" 
+            id="fileInput"
+            (change)="onFileSelected($event)"
+            accept="*/*"
+            style="display: none">
+          
+          <button 
+            mat-raised-button 
+            color="accent"
+            (click)="triggerFileInput()"
+            class="full-width mb-20">
+            <mat-icon>attach_file</mat-icon>
+            Choose File
+          </button>
+
+          <p *ngIf="selectedFile" class="selected-file">
+            Selected: <strong>{{ selectedFile.name }}</strong>
+            ({{ (selectedFile.size / 1024).toFixed(2) }} KB)
+          </p>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            (click)="uploadFile()"
+            [disabled]="!selectedFile || uploadingFile"
+            class="full-width">
+            <mat-icon *ngIf="!uploadingFile">cloud_upload</mat-icon>
+            <mat-spinner *ngIf="uploadingFile" diameter="20"></mat-spinner>
+            {{ uploadingFile ? 'Uploading...' : 'Upload to GCS' }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Middle Section: Data Tables (Side by side) -->
+  <div class="grid-container grid-2-col">
+    
+    <!-- All Users from SQL -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>All Users</mat-card-title>
+        <mat-card-subtitle>Retrieved from Cloud SQL (PostgreSQL)</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div *ngIf="loadingUsers" class="text-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+
+        <table mat-table [dataSource]="allUsers" *ngIf="!loadingUsers" class="full-width">
+          
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> ID </th>
+            <td mat-cell *matCellDef="let user"> {{ user.id }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let user"> {{ user.name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let user"> {{ user.email }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef> Created </th>
+            <td mat-cell *matCellDef="let user"> {{ user.createdAt | date:'short' }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+        </table>
+
+        <p *ngIf="!loadingUsers && allUsers.length === 0" class="text-center mt-20">
+          No users found. Create one using the form above.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Latest 3 Users from Redis -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Latest 3 Users (Cached)</mat-card-title>
+        <mat-card-subtitle>Retrieved from Memorystore Redis (60s TTL)</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div *ngIf="loadingLatest" class="text-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+
+        <table mat-table [dataSource]="latestUsers" *ngIf="!loadingLatest" class="full-width">
+          
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> ID </th>
+            <td mat-cell *matCellDef="let user"> {{ user.id }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let user"> {{ user.name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let user"> {{ user.email }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="latestUserColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: latestUserColumns;"></tr>
+        </table>
+
+        <p *ngIf="!loadingLatest && latestUsers.length === 0" class="text-center mt-20">
+          No cached users available.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Bottom Section: Pub/Sub Events -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Pub/Sub Event Messages</mat-card-title>
+      <mat-card-subtitle>Real-time events from Cloud Pub/Sub</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div *ngIf="loadingEvents" class="text-center">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <div *ngIf="!loadingEvents && pubSubEvents.length > 0" class="events-list">
+        <mat-chip-listbox>
+          <mat-chip *ngFor="let event of pubSubEvents" [class]="getEventChipClass(event.source)">
+            <strong>{{ event.source | uppercase }}:</strong> {{ event.message }}
+            <br>
+            <small>{{ event.timestamp | date:'short' }}</small>
+          </mat-chip>
+        </mat-chip-listbox>
+      </div>
+
+      <p *ngIf="!loadingEvents && pubSubEvents.length === 0" class="text-center mt-20">
+        No Pub/Sub events yet. Create a user or upload a file to generate events.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+</div>
