@@ -1,219 +1,464 @@
-# DotNet GCP Full-Stack Application
+# .NET GCP Full-Stack Application with Terraform
 
-A production-ready full-stack application demonstrating best practices for deploying .NET 6 backend and Angular 20 frontend on Google Cloud Platform (GCP).
+A production-ready full-stack application demonstrating Infrastructure as Code (IaC) deployment of .NET 6 backend and Angular frontend on Google Cloud Platform using Terraform.
+
+## 🌟 Overview
+
+This project showcases a complete enterprise-grade cloud infrastructure deployment using Terraform, featuring:
+- **Infrastructure as Code** - Complete GCP infrastructure defined in Terraform
+- **Private GKE Cluster** - Secure Kubernetes environment with Workload Identity
+- **Microservices Architecture** - Containerized backend and frontend
+- **Cloud-Native Services** - Cloud SQL, Redis, Pub/Sub, Cloud Storage
+- **Security Best Practices** - Private clusters, service accounts, IAM policies
+- **Automated Deployment** - One-command infrastructure and application deployment
 
 ## 📚 Documentation
 
-This repository includes comprehensive documentation to help you understand, deploy, and maintain the application:
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture, design decisions, and technical specifications
-- **[DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)** - Step-by-step deployment instructions from scratch
-- **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - Quick commands and troubleshooting guide
-- **[CONFIGURATION.md](CONFIGURATION.md)** - Configuration details for all components
-- **[NETWORK-CONNECTIVITY.md](NETWORK-CONNECTIVITY.md)** - Network architecture and connectivity
-- **[CHANGES.md](CHANGES.md)** - Change log and version history
-- **[terraform/README.md](terraform/README.md)** - Infrastructure as Code documentation
-
-## 🚀 Quick Start
-
-**For first-time setup:**
-1. Read [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for complete instructions
-2. Navigate to `terraform/` directory
-3. Follow Terraform setup in [terraform/README.md](terraform/README.md)
-
-**For quick reference:**
-- See [QUICK-REFERENCE.md](QUICK-REFERENCE.md) for common commands and troubleshooting
-
-## 🏗️ Architecture Overview
-
-```
-User → Bastion VM → Frontend ILB → Backend ILB → GCP Services
-                         ↓               ↓
-                    Angular App     .NET 6 API
-                                        ↓
-                    ┌───────────────────┴────────────────────┐
-                    ↓           ↓           ↓                ↓
-              Cloud SQL     Redis     Pub/Sub      Cloud Storage
-           (PostgreSQL)  (Memorystore)              (Bucket)
-```
-
-**📖 For detailed architecture and design decisions, see [ARCHITECTURE.md](ARCHITECTURE.md)**
-
-## 📁 Project Structure
-
-```
-root/
-│
-├── frontend/                  # Angular 20 application
-│   ├── src/                   # Source code
-│   │   ├── app/              # Main app component
-│   │   ├── index.html        # Entry HTML
-│   │   ├── main.ts           # Bootstrap file
-│   │   └── styles.scss       # Global styles
-│   ├── Dockerfile            # Multi-stage build
-│   ├── nginx.conf            # Nginx configuration
-│   ├── package.json          # Dependencies
-│   ├── angular.json          # Angular CLI config
-│   └── README.md             # Frontend documentation
-│
-├── backend/                   # .NET 6 Web API
-│   ├── src/                   # Source code
-│   │   ├── CloudSql/         # PostgreSQL service
-│   │   ├── Redis/            # Redis caching service
-│   │   ├── PubSub/           # Pub/Sub messaging service
-│   │   ├── Storage/          # Cloud Storage service
-│   │   ├── Models/           # Data models
-│   │   ├── Controllers/      # API controllers
-│   │   ├── Program.cs        # Application entry point
-│   │   ├── appsettings.json  # Configuration
-│   │   └── DotNetGcpApp.csproj  # Project file
-│   ├── Dockerfile            # Multi-stage build
-│   └── README.md             # Backend documentation
-│
-├── k8s/                       # Kubernetes manifests
-│   ├── backend.yaml          # Backend resources
-│   ├── frontend.yaml         # Frontend resources
-│   └── README.md             # Deployment guide
-│
-└── README.md                  # This file
-```
-
-## 🌐 Application Features
-
-### Frontend (Angular 20)
-- **Single-page UI** with Material Design
-- **Real-time updates** (auto-refresh every 5 seconds)
-- **User management** (create and view users)
-- **File upload** to Cloud Storage
-- **Event monitoring** (Pub/Sub messages)
-- **Responsive design** (mobile and desktop)
-
-### Backend (.NET 6)
-- **RESTful API** with Swagger documentation
-- **Cloud SQL integration** (PostgreSQL 15)
-- **Redis caching** (60-second TTL for latest users)
-- **Pub/Sub messaging** (event-driven architecture)
-- **Cloud Storage** (file uploads)
-- **Workload Identity** (secure GCP authentication)
-
-## 🔧 GCP Services Used
-
-| Service | Instance Name | Purpose | Connection |
-|---------|---------------|---------|------------|
-| **Cloud SQL** | `dot-net-db` | PostgreSQL database | Private IP: `10.92.160.3` |
-| **Memorystore Redis** | `dot-net-redis` | Caching layer | Private IP: `10.127.80.5` |
-| **Pub/Sub** | `dot-net-topic` | Event messaging | Workload Identity |
-| **Cloud Storage** | `dot-net-bucket` | File storage | Workload Identity |
-| **GKE** | `private-gke-cluster` | Container orchestration | Regional cluster |
-| **Artifact Registry** | `dot-net-repo` | Docker image storage | asia-south2 |
-| **VPC** | `dot-net-vpc` | Private network | Custom mode |
+- **[DEPLOYMENT-STEPS.md](DEPLOYMENT-STEPS.md)** - Complete step-by-step deployment guide after Terraform
+- **[terraform/README.md](terraform/README.md)** - Terraform infrastructure documentation
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- GCP account with billing enabled
-- gcloud CLI installed and configured
-- kubectl installed
-- Docker installed
-- Node.js 20+ (for local frontend development)
-- .NET 6 SDK (for local backend development)
 
-### 0. Configuration Setup
-
-**⚠️ IMPORTANT: Before running the application, set up environment configuration!**
-
-Read the complete configuration guide: **[CONFIGURATION.md](./CONFIGURATION.md)**
-
-#### Backend Configuration
 ```bash
-# Copy the example .env file
-cp backend/.env.example backend/.env
+# Required tools
+- Terraform >= 1.0
+- gcloud CLI
+- Docker
+- kubectl
 
-# Edit .env with your actual GCP service credentials
-# The file already contains the correct values for this project
+# GCP Authentication
+gcloud auth login
+gcloud auth application-default login
 ```
 
-#### Frontend Configuration
-```bash
-# For local development, edit:
-frontend/src/environments/environment.ts
+### 1. Deploy Infrastructure with Terraform
 
-# For production deployment, edit:
-frontend/src/environments/environment.prod.ts
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your project details
+terraform init
+terraform plan
+terraform apply
 ```
 
-See [CONFIGURATION.md](./CONFIGURATION.md) for detailed setup instructions.
+**✅ This creates 31 resources:**
+- VPC with private/public subnets
+- Private GKE cluster (2 nodes)
+- Cloud SQL PostgreSQL
+- Redis (Memorystore)
+- Pub/Sub topic and subscription
+- Cloud Storage bucket
+- Artifact Registry
+- Bastion VM
+- Service accounts and IAM bindings
 
-### 1. Set Up GCP Infrastructure
+### 2. Deploy Application
 
-All GCP services are already created:
-- ✅ VPC network (`dot-net-vpc`) with subnets
-- ✅ Cloud SQL PostgreSQL instance
-- ✅ Memorystore Redis instance
-- ✅ Pub/Sub topic and subscription
-- ✅ Cloud Storage bucket
-- ✅ GKE private cluster
-- ✅ Artifact Registry repository
+Follow the detailed steps in **[DEPLOYMENT-STEPS.md](DEPLOYMENT-STEPS.md)** or use the automated script:
 
-### 2. Build and Deploy
-
-#### Step 1: Configure Docker for Artifact Registry
 ```bash
+# One-command deployment (after Terraform)
+./deploy-app.sh
+```
+
+## 🏗️ Architecture
+
+```
+Internet
+   ↓
+Bastion VM (Public IP: 34.131.236.231)
+   ↓
+Nginx Reverse Proxy
+   ├─→ Frontend ILB (10.0.1.7) → Angular Pods
+   └─→ Backend ILB (10.0.1.6) → .NET Pods
+                                    ↓
+                    ┌───────────────┴────────────────────┐
+                    ↓               ↓                    ↓
+              Cloud SQL (10.117.0.3)  Redis (10.163.53.91)  Pub/Sub + Storage
+           (PostgreSQL 15)          (1GB Memory)          (Event-driven)
+```
+
+### Key Features
+
+**Security:**
+- ✅ Private GKE cluster (no public endpoints)
+- ✅ Workload Identity for pod authentication
+- ✅ Service accounts with least-privilege IAM
+- ✅ Private IP addresses for all services
+- ✅ Bastion VM as single entry point
+
+**Scalability:**
+- ✅ GKE autoscaling (2-4 nodes)
+- ✅ Internal load balancers
+- ✅ Horizontal pod autoscaling ready
+- ✅ Cloud SQL connection pooling
+
+**Reliability:**
+- ✅ Multi-zone GKE nodes
+- ✅ Health checks and readiness probes
+- ✅ Cloud SQL automated backups
+- ✅ Redis persistence
+
+## 📁 Project Structure
+
+```
+.
+├── backend/                      # .NET 6 Web API
+│   ├── src/
+│   │   ├── CloudSql/            # PostgreSQL service
+│   │   ├── Redis/               # Redis caching
+│   │   ├── PubSub/              # Pub/Sub messaging
+│   │   ├── Storage/             # Cloud Storage
+│   │   ├── Controllers/         # API endpoints
+│   │   ├── Models/              # Data models
+│   │   └── Program.cs           # Entry point
+│   ├── Dockerfile               # Container image
+│   └── .env                     # Configuration
+│
+├── frontend/                    # Angular Frontend
+│   ├── src/
+│   │   ├── app/                # Components
+│   │   └── environments/       # Config files
+│   ├── Dockerfile              # Container image
+│   └── nginx.conf              # Web server config
+│
+├── terraform/                   # Infrastructure as Code
+│   ├── main.tf                 # Main infrastructure
+│   ├── variables.tf            # Input variables
+│   ├── outputs.tf              # Output values
+│   ├── versions.tf             # Provider versions
+│   ├── terraform.tfvars        # Your values
+│   └── README.md               # Terraform docs
+│
+├── k8s/                        # Kubernetes Manifests
+│   ├── backend.yaml            # Backend deployment
+│   └── frontend.yaml           # Frontend deployment
+│
+├── bastion-nginx.conf          # Bastion reverse proxy
+├── DEPLOYMENT-STEPS.md         # Deployment guide
+└── README.md                   # This file
+```
+
+## 🛠️ Technology Stack
+
+**Frontend:**
+- Angular 20
+- TypeScript
+- RxJS
+- Nginx (Alpine)
+
+**Backend:**
+- .NET 6 (ASP.NET Core)
+- C#
+- Entity Framework Core
+- NuGet Packages:
+  - `Npgsql.EntityFrameworkCore.PostgreSQL` - PostgreSQL
+  - `StackExchange.Redis` - Redis client
+  - `Google.Cloud.PubSub.V1` - Pub/Sub
+  - `Google.Cloud.Storage.V1` - Cloud Storage
+
+**Infrastructure:**
+- **IaC**: Terraform 1.0+
+- **Container Orchestration**: Google Kubernetes Engine (GKE)
+- **Database**: Cloud SQL PostgreSQL 15
+- **Cache**: Memorystore Redis 7.0
+- **Messaging**: Cloud Pub/Sub
+- **Storage**: Cloud Storage
+- **Registry**: Artifact Registry
+- **Networking**: VPC, Internal Load Balancers
+- **Security**: Service Accounts, Workload Identity, IAM
+
+## 🌐 Application Features
+
+### Backend API (.NET 6)
+- **User Management** - CRUD operations with PostgreSQL
+- **File Upload** - Store files in Cloud Storage
+- **Pub/Sub Events** - Publish/subscribe messaging
+- **Redis Caching** - Fast data access
+- **Health Checks** - Kubernetes readiness/liveness probes
+- **CORS Enabled** - Cross-origin requests
+- **Swagger UI** - API documentation at `/swagger`
+
+**API Endpoints:**
+```
+GET    /health              - Health check
+GET    /api/users           - Get all users
+POST   /api/users           - Create user
+GET    /api/users/latest    - Get latest users
+POST   /api/upload          - Upload file
+GET    /api/upload/files    - List files
+POST   /api/pubsub/publish  - Publish message
+GET    /api/pubsub/events   - Get published events
+```
+
+### Frontend (Angular)
+- **Single-page application** with responsive UI
+- **User management** - Create and view users
+- **File upload** - Upload to Cloud Storage
+- **Event monitoring** - View Pub/Sub messages
+- **Auto-refresh** - Real-time data updates (5s interval)
+- **Material Design** - Modern UI components
+
+## 💰 Cost Estimation
+
+**Approximate monthly costs (with Terraform infrastructure):**
+
+| Service | Configuration | ~Monthly Cost |
+|---------|--------------|---------------|
+| GKE Cluster | 2 e2-medium nodes (zonal) | ~$50 |
+| Cloud SQL | db-f1-micro, 10GB HDD | ~$15 |
+| Redis | BASIC tier, 1GB | ~$30 |
+| Pub/Sub | 1GB messages | ~$2 |
+| Cloud Storage | 10GB storage | ~$0.30 |
+| Network | Internal LB, egress | ~$10 |
+| Artifact Registry | 5GB storage | ~$0.50 |
+| **Total** | | **~$108/month** |
+
+*Costs can be reduced by:*
+- Using Spot VMs for GKE nodes
+- Smaller Redis instance
+- Stopping resources when not in use
+
+## 🔧 Configuration
+
+### GCP Services Created by Terraform
+
+| Service | Name | Configuration |
+|---------|------|---------------|
+| **VPC** | `dot-net-vpc` | Private (10.0.1.0/24) + Public (10.0.2.0/24) subnets |
+| **GKE** | `private-gke-cluster` | Zonal, 2-4 e2-medium nodes, Workload Identity |
+| **Cloud SQL** | `dot-net-postgres` | PostgreSQL 15, db-f1-micro, 10GB HDD |
+| **Redis** | `dot-net-redis` | BASIC tier, 1GB memory, REDIS_7_0 |
+| **Pub/Sub** | `dot-net-topic` | Topic + subscription |
+| **Storage** | `dot-net-bucket` | Regional bucket with CORS |
+| **Registry** | `dot-net-repo` | Docker repository |
+| **Bastion VM** | `dot-net-bastion-vm` | e2-small with Nginx, Docker, kubectl |
+
+### Environment Variables
+
+**Backend (.env):**
+```bash
+CloudSql__Host=10.117.0.3          # From Terraform output
+CloudSql__Database=dotnetdb
+CloudSql__Username=postgres
+CloudSql__Password=DotNet@123
+
+Redis__Host=10.163.53.91           # From Terraform output
+Redis__Port=6379
+
+GCP__ProjectId=project-84d8bfc9-cd8e-4b3c-b15
+PubSub__TopicId=dot-net-topic
+PubSub__SubscriptionId=dot-net-sub
+Storage__BucketName=dot-net-bucket
+```
+
+**Frontend (environment.prod.ts):**
+```typescript
+export const environment = {
+  production: true,
+  apiUrl: '/api',  // Proxied through bastion nginx
+};
+```
+
+## 📦 Deployment
+
+### Option 1: Automated Deployment
+
+After running `terraform apply`, use the automated script:
+```bash
+chmod +x deploy-app.sh
+./deploy-app.sh
+```
+
+### Option 2: Manual Step-by-Step
+
+Follow the complete guide in **[DEPLOYMENT-STEPS.md](DEPLOYMENT-STEPS.md)** with detailed commands for each step.
+
+### Quick Verification
+
+```bash
+# Check all pods running
+kubectl get pods
+
+# Check services
+kubectl get svc
+
+# Test backend API
+BASTION_IP=$(cd terraform && terraform output -raw bastion_external_ip)
+curl http://$BASTION_IP/api/health
+
+# Open in browser
+echo "http://$BASTION_IP"
+```
+
+## 🧪 Testing
+
+### Test Backend API
+
+```bash
+# Health check
+curl http://BASTION_IP/health
+
+# Create user
+curl -X POST http://BASTION_IP/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com"}'
+
+# Get users
+curl http://BASTION_IP/api/users
+
+# Upload file
+curl -X POST http://BASTION_IP/api/upload \
+  -F "file=@test.txt"
+
+# List files
+curl http://BASTION_IP/api/upload/files
+
+# Publish message
+curl -X POST http://BASTION_IP/api/pubsub/publish \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello Pub/Sub!"}'
+
+# Get events
+curl http://BASTION_IP/api/pubsub/events
+```
+
+### Access Swagger UI
+
+```
+http://BASTION_IP/swagger
+```
+
+## 🔍 Monitoring & Logs
+
+### View Application Logs
+
+```bash
+# Backend logs
+kubectl logs -l app=backend --tail=100
+
+# Frontend logs
+kubectl logs -l app=frontend --tail=100
+
+# Follow logs
+kubectl logs -l app=backend -f
+```
+
+### Check Pod Status
+
+```bash
+# Get all pods
+kubectl get pods
+
+# Describe pod
+kubectl describe pod <pod-name>
+
+# Get events
+kubectl get events --sort-by='.lastTimestamp'
+```
+
+### GKE Monitoring
+
+```bash
+# Open GKE console
+gcloud console
+
+# View metrics
+https://console.cloud.google.com/kubernetes/workload
+```
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**Pods not starting?**
+```bash
+kubectl describe pod <pod-name>
+kubectl logs <pod-name>
+```
+
+**Can't connect to Cloud SQL?**
+```bash
+# Verify private IP
+gcloud sql instances describe dot-net-postgres --format="get(ipAddresses[0].ipAddress)"
+
+# Check Workload Identity
+kubectl describe serviceaccount backend-sa
+```
+
+**Redis connection failed?**
+```bash
+# Verify Redis instance
+gcloud redis instances describe dot-net-redis --region=asia-south2
+```
+
+**Images not pulling?**
+```bash
+# Verify Artifact Registry
+gcloud artifacts docker images list asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo
+
+# Re-authenticate Docker
 gcloud auth configure-docker asia-south2-docker.pkg.dev
 ```
 
-#### Step 2: Build and Push Images
-```bash
-# Backend
-cd backend
-docker build -t asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:latest .
-docker push asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:latest
+## 🧹 Cleanup
 
-# Frontend
-cd ../frontend
-docker build -t asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/frontend:latest .
-docker push asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/frontend:latest
+### Delete Application
+
+```bash
+kubectl delete -f k8s/backend.yaml
+kubectl delete -f k8s/frontend.yaml
 ```
 
-#### Step 3: Set Up Workload Identity
+### Destroy Infrastructure
+
 ```bash
-# Create GCP service account
-gcloud iam service-accounts create backend-gke-sa \
-  --display-name="Backend GKE Service Account"
-
-# Grant permissions
-gcloud projects add-iam-policy-binding project-84d8bfc9-cd8e-4b3c-b15 \
-  --member="serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com" \
-  --role="roles/cloudsql.client"
-
-gcloud projects add-iam-policy-binding project-84d8bfc9-cd8e-4b3c-b15 \
-  --member="serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com" \
-  --role="roles/pubsub.publisher"
-
-gcloud projects add-iam-policy-binding project-84d8bfc9-cd8e-4b3c-b15 \
-  --member="serviceAccount:backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com" \
-  --role="roles/storage.objectCreator"
-
-# Bind to Kubernetes SA
-gcloud iam service-accounts add-iam-policy-binding \
-  backend-gke-sa@project-84d8bfc9-cd8e-4b3c-b15.iam.gserviceaccount.com \
-  --role roles/iam.workloadIdentityUser \
-  --member "serviceAccount:project-84d8bfc9-cd8e-4b3c-b15.svc.id.goog[default/backend-sa]"
+cd terraform
+terraform destroy
 ```
 
-#### Step 4: Connect to GKE
-```bash
-gcloud container clusters get-credentials private-gke-cluster --region asia-south2
-```
+**⚠️ Warning:** This will delete:
+- GKE cluster and all pods
+- Cloud SQL database (all data)
+- Redis instance (all cached data)
+- Pub/Sub topic and messages
+- Cloud Storage bucket (all files)
+- VPC and networking resources
+- Service accounts and IAM bindings
 
-#### Step 5: Deploy to Kubernetes
-```bash
-kubectl apply -f k8s/backend.yaml
-kubectl apply -f k8s/frontend.yaml
-```
+## 📚 Additional Resources
 
-#### Step 6: Verify Deployment
-```bash
+- **[DEPLOYMENT-STEPS.md](DEPLOYMENT-STEPS.md)** - Complete deployment guide
+- **[terraform/README.md](terraform/README.md)** - Terraform documentation
+- [GKE Documentation](https://cloud.google.com/kubernetes-engine/docs)
+- [Cloud SQL Documentation](https://cloud.google.com/sql/docs)
+- [.NET on GCP](https://cloud.google.com/dotnet)
+- [Angular Documentation](https://angular.io/docs)
+
+## 📝 License
+
+This project is for educational and demonstration purposes.
+
+## 👤 Author
+
+**Jatin Jaiswal**
+- GitHub: [@Jatin-Jaiswal](https://github.com/Jatin-Jaiswal)
+- Repository: [DotNet_GCP](https://github.com/Jatin-Jaiswal/DotNet_GCP)
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+## ⭐ Show Your Support
+
+Give a ⭐️ if this project helped you learn about GCP, Terraform, .NET, and Kubernetes!
+
+---
+
+**Built with ❤️ using Terraform, .NET 6, Angular, and Google Cloud Platform**
 # Check pods
 kubectl get pods
 
