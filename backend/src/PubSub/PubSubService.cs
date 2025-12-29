@@ -1,6 +1,7 @@
 using Google.Cloud.PubSub.V1;
 using System.Text.Json;
 using DotNetGcpApp.Models;
+using DotNetGcpApp.SecretManager;
 
 namespace DotNetGcpApp.PubSub
 {
@@ -17,21 +18,16 @@ namespace DotNetGcpApp.PubSub
 
         /// <summary>
         /// Constructor that creates a Pub/Sub publisher client
-        /// Uses environment variables for configuration
+        /// Fetches configuration from Google Secret Manager
         /// Uses Workload Identity for secure authentication from GKE
         /// </summary>
-        public PubSubService(IConfiguration configuration, ILogger<PubSubService> logger)
+        public PubSubService(SecretManagerService secretManager, ILogger<PubSubService> logger)
         {
             _logger = logger;
 
-            // Get project ID and topic name from environment variables
-            var projectId = Environment.GetEnvironmentVariable("GCP_PROJECT_ID") 
-                            ?? configuration["GCP:ProjectId"] 
-                            ?? "project-84d8bfc9-cd8e-4b3c-b15";
-            
-            var topicId = Environment.GetEnvironmentVariable("PUBSUB_TOPIC_ID") 
-                          ?? configuration["PubSub:TopicId"] 
-                          ?? "dot-net-topic";
+            // Get project ID and topic name from Secret Manager
+            var projectId = secretManager.GetSecretValue("gcp-project-id");
+            var topicId = secretManager.GetSecretValue("pubsub-topic-id");
 
             // Build the full topic name in the format: projects/{project}/topics/{topic}
             _topicName = $"projects/{projectId}/topics/{topicId}";
@@ -42,7 +38,7 @@ namespace DotNetGcpApp.PubSub
                 var topicName = TopicName.FromProjectTopic(projectId, topicId);
                 _publisher = PublisherClient.CreateAsync(topicName).GetAwaiter().GetResult();
 
-                _logger.LogInformation($"Pub/Sub publisher initialized for topic: {_topicName}");
+                _logger.LogInformation($"✅ Pub/Sub publisher initialized from Secret Manager: {_topicName}");
             }
             catch (Exception ex)
             {

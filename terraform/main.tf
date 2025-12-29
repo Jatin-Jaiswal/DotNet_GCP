@@ -464,3 +464,229 @@ NGINX
 
   depends_on = [google_container_cluster.primary]
 }
+
+# ================================================
+# SECRET MANAGER
+# ================================================
+
+# Enable Secret Manager API
+resource "google_project_service" "secretmanager" {
+  service            = "secretmanager.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Cloud SQL Secrets
+resource "google_secret_manager_secret" "cloudsql_host" {
+  secret_id = "cloudsql-host"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_host_version" {
+  secret      = google_secret_manager_secret.cloudsql_host.id
+  secret_data = google_sql_database_instance.postgres.private_ip_address
+}
+
+resource "google_secret_manager_secret" "cloudsql_database" {
+  secret_id = "cloudsql-database"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_database_version" {
+  secret      = google_secret_manager_secret.cloudsql_database.id
+  secret_data = google_sql_database.database.name
+}
+
+resource "google_secret_manager_secret" "cloudsql_username" {
+  secret_id = "cloudsql-username"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_username_version" {
+  secret      = google_secret_manager_secret.cloudsql_username.id
+  secret_data = google_sql_user.postgres_user.name
+}
+
+resource "google_secret_manager_secret" "cloudsql_password" {
+  secret_id = "cloudsql-password"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_password_version" {
+  secret      = google_secret_manager_secret.cloudsql_password.id
+  secret_data = var.db_password
+}
+
+# Redis Secrets
+resource "google_secret_manager_secret" "redis_host" {
+  secret_id = "redis-host"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "redis_host_version" {
+  secret      = google_secret_manager_secret.redis_host.id
+  secret_data = google_redis_instance.redis.host
+}
+
+resource "google_secret_manager_secret" "redis_port" {
+  secret_id = "redis-port"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "redis_port_version" {
+  secret      = google_secret_manager_secret.redis_port.id
+  secret_data = tostring(google_redis_instance.redis.port)
+}
+
+# GCP Project Secret
+resource "google_secret_manager_secret" "gcp_project_id" {
+  secret_id = "gcp-project-id"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "gcp_project_id_version" {
+  secret      = google_secret_manager_secret.gcp_project_id.id
+  secret_data = var.project_id
+}
+
+# Pub/Sub Secrets
+resource "google_secret_manager_secret" "pubsub_topic_id" {
+  secret_id = "pubsub-topic-id"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "pubsub_topic_id_version" {
+  secret      = google_secret_manager_secret.pubsub_topic_id.id
+  secret_data = google_pubsub_topic.topic.name
+}
+
+resource "google_secret_manager_secret" "pubsub_subscription_id" {
+  secret_id = "pubsub-subscription-id"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "pubsub_subscription_id_version" {
+  secret      = google_secret_manager_secret.pubsub_subscription_id.id
+  secret_data = google_pubsub_subscription.subscription.name
+}
+
+# Storage Secret
+resource "google_secret_manager_secret" "storage_bucket_name" {
+  secret_id = "storage-bucket-name"
+  
+  replication {
+    auto {}
+  }
+  
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "storage_bucket_name_version" {
+  secret      = google_secret_manager_secret.storage_bucket_name.id
+  secret_data = google_storage_bucket.bucket.name
+}
+
+# IAM Permissions - Grant backend service account access to all secrets
+resource "google_secret_manager_secret_iam_member" "cloudsql_host_access" {
+  secret_id = google_secret_manager_secret.cloudsql_host.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "cloudsql_database_access" {
+  secret_id = google_secret_manager_secret.cloudsql_database.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "cloudsql_username_access" {
+  secret_id = google_secret_manager_secret.cloudsql_username.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "cloudsql_password_access" {
+  secret_id = google_secret_manager_secret.cloudsql_password.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "redis_host_access" {
+  secret_id = google_secret_manager_secret.redis_host.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "redis_port_access" {
+  secret_id = google_secret_manager_secret.redis_port.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "gcp_project_id_access" {
+  secret_id = google_secret_manager_secret.gcp_project_id.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "pubsub_topic_id_access" {
+  secret_id = google_secret_manager_secret.pubsub_topic_id.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "pubsub_subscription_id_access" {
+  secret_id = google_secret_manager_secret.pubsub_subscription_id.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "storage_bucket_name_access" {
+  secret_id = google_secret_manager_secret.storage_bucket_name.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}

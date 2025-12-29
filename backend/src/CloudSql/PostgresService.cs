@@ -1,5 +1,6 @@
 using Npgsql;
 using DotNetGcpApp.Models;
+using DotNetGcpApp.SecretManager;
 
 namespace DotNetGcpApp.CloudSql
 {
@@ -12,34 +13,25 @@ namespace DotNetGcpApp.CloudSql
     {
         private readonly string _connectionString;
         private readonly ILogger<PostgresService> _logger;
+        private readonly SecretManagerService _secretManager;
 
         /// <summary>
         /// Constructor that initializes the PostgreSQL connection string
-        /// Uses environment variables for configuration (from .env file or Kubernetes ConfigMap)
+        /// Fetches all configuration from Google Secret Manager
         /// </summary>
-        public PostgresService(IConfiguration configuration, ILogger<PostgresService> logger)
+        public PostgresService(SecretManagerService secretManager, ILogger<PostgresService> logger)
         {
             _logger = logger;
+            _secretManager = secretManager;
             
-            // Build connection string using environment variables
-            // Priority: Environment variables > Configuration file > Default values
-            var host = Environment.GetEnvironmentVariable("CLOUDSQL_HOST") 
-                       ?? configuration["CloudSql:Host"] 
-                       ?? "10.92.160.3";
-            
-            var database = Environment.GetEnvironmentVariable("CLOUDSQL_DATABASE") 
-                           ?? configuration["CloudSql:Database"] 
-                           ?? "dotnetdb";
-            
-            var username = Environment.GetEnvironmentVariable("CLOUDSQL_USERNAME") 
-                           ?? configuration["CloudSql:Username"] 
-                           ?? "postgres";
-            
-            var password = Environment.GetEnvironmentVariable("CLOUDSQL_PASSWORD") 
-                           ?? configuration["CloudSql:Password"] 
-                           ?? "postgres";
+            // Fetch all configuration from Secret Manager
+            var host = _secretManager.GetSecretValue("cloudsql-host");
+            var database = _secretManager.GetSecretValue("cloudsql-database");
+            var username = _secretManager.GetSecretValue("cloudsql-username");
+            var password = _secretManager.GetSecretValue("cloudsql-password");
 
             _connectionString = $"Host={host};Database={database};Username={username};Password={password};Pooling=true;MinPoolSize=0;MaxPoolSize=100;ConnectionLifetime=0;";
+            _logger.LogInformation("✅ PostgreSQL connection initialized with all config from Secret Manager");
         }
 
         /// <summary>

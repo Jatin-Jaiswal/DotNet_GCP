@@ -1,4 +1,5 @@
 using Google.Cloud.Storage.V1;
+using DotNetGcpApp.SecretManager;
 
 namespace DotNetGcpApp.Storage
 {
@@ -15,24 +16,22 @@ namespace DotNetGcpApp.Storage
 
         /// <summary>
         /// Constructor that initializes the Cloud Storage client
-        /// Uses environment variables for configuration
+        /// Fetches configuration from Google Secret Manager
         /// Uses Workload Identity for secure authentication from GKE
         /// </summary>
-        public StorageService(IConfiguration configuration, ILogger<StorageService> logger)
+        public StorageService(SecretManagerService secretManager, ILogger<StorageService> logger)
         {
             _logger = logger;
 
-            // Get bucket name from environment variables
-            _bucketName = Environment.GetEnvironmentVariable("STORAGE_BUCKET_NAME") 
-                          ?? configuration["Storage:BucketName"] 
-                          ?? "dot-net-bucket";
+            // Get bucket name from Secret Manager
+            _bucketName = secretManager.GetSecretValue("storage-bucket-name");
 
             try
             {
                 // Create storage client (uses Workload Identity automatically in GKE)
                 _storageClient = StorageClient.Create();
 
-                _logger.LogInformation($"Storage client initialized for bucket: {_bucketName}");
+                _logger.LogInformation($"✅ Storage client initialized from Secret Manager: {_bucketName}");
             }
             catch (Exception ex)
             {

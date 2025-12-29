@@ -4,65 +4,52 @@ This guide provides the exact commands and steps to deploy the application after
 
 ## Prerequisites
 
-- Terraform has successfully created all 31 resources
+- Terraform has successfully created all 62 resources (including Secret Manager)
 - You have `gcloud`, `docker`, and `kubectl` installed locally
 - You are authenticated with GCP: `gcloud auth login`
 
+## Architecture Overview
+
+This deployment uses **Google Secret Manager** for centralized configuration management:
+- All sensitive configuration (Cloud SQL, Redis, Pub/Sub, Storage) is stored in Secret Manager
+- Application automatically fetches secrets at runtime using GKE Workload Identity
+- No hardcoded credentials in ConfigMaps or environment variables
+- Zero manual configuration updates needed when infrastructure changes
+
 ---
 
-## Step 1: Get Infrastructure IPs from Terraform
+## Step 1: Verify Infrastructure and Secret Manager
 
 ```bash
 cd terraform
 terraform output
 ```
 
-**Note down these values:**
-- `bastion_external_ip` - Bastion VM public IP
-- `cloudsql_private_ip` - Cloud SQL private IP
-- `redis_host` - Redis instance IP
+**Verify these resources are created:**
+- `bastion_external_ip` - Bastion VM public IP (e.g., 34.131.29.2)
+- `cloudsql_private_ip` - Cloud SQL private IP (e.g., 10.23.0.3)
+- `redis_host` - Redis instance IP (e.g., 10.119.34.243)
 - `backend_service_account` - Backend service account email
+- `secret_manager_secrets` - List of 10 secrets created
+
+### Verify Secrets are Populated
+
+```bash
+# Check Cloud SQL host secret
+gcloud secrets versions access latest --secret="cloudsql-host"
+
+# Check Redis host secret  
+gcloud secrets versions access latest --secret="redis-host"
+
+# Check GCP project ID secret
+gcloud secrets versions access latest --secret="gcp-project-id"
+```
+
+**Expected output:** Should show actual IP addresses and project ID (not placeholders)
 
 ---
 
-## Step 2: Update Backend Configuration
-
-### 2.1 Get the IPs
-```bash
-CLOUDSQL_IP=$(cd terraform && terraform output -raw cloudsql_private_ip)
-REDIS_IP=$(cd terraform && terraform output -raw redis_host)
-echo "Cloud SQL IP: $CLOUDSQL_IP"
-echo "Redis IP: $REDIS_IP"
-```
-
-### 2.2 Update `k8s/backend.yaml`
-
-Open the file and update these lines in the ConfigMap section:
-
-```yaml
-# Line ~13: Update Cloud SQL Host
-CloudSql__Host: "10.117.0.3"  # Replace with $CLOUDSQL_IP
-
-# Line ~18: Update Redis Host
-Redis__Host: "10.163.53.91"   # Replace with $REDIS_IP
-```
-
-**Manual edit:**
-```bash
-nano k8s/backend.yaml
-# OR
-code k8s/backend.yaml
-```
-
-**Automated update:**
-```bash
-sed -i "s/CloudSql__Host: \".*\"/CloudSql__Host: \"$CLOUDSQL_IP\"/" k8s/backend.yaml
-sed -i "s/Redis__Host: \".*\"/Redis__Host: \"$REDIS_IP\"/" k8s/backend.yaml
-```
-
----
-
-## Step 3: Configure Docker for Artifact Registry
+## Step 2: Configure Docker for Artifact Registry
 
 ```bash
 gcloud auth configure-docker asia-south2-docker.pkg.dev --quiet
@@ -70,12 +57,17 @@ gcloud auth configure-docker asia-south2-docker.pkg.dev --quiet
 
 ---
 
-## Step 4: Build and Push Backend Image
+## Step 3: Build and Push Backend Image
+
+The backend application includes Secret Manager integration that:
+- Retrieves project ID from GKE metadata service
+- Fetches all configuration from Secret Manager at runtime
+- No hardcoded values or manual configuration needed
 
 ```bash
 cd backend
-docker build -t asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:latest .
-docker push asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:latest
+docker build -t asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:secret-manager-v2 .
+docker push asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:secret-manager-v2
 cd ..
 ```
 
@@ -83,24 +75,29 @@ cd ..
 
 ---
 
-## Step 5: Deploy Backend to GKE
+## Step 4: Deploy Backend to GKE
 
-### 5.1 Copy backend.yaml to Bastion VM
-```bash
-BASTION_IP=$(cd terraform && terraform output -raw bastion_external_ip)
-gcloud compute scp k8s/backend.yaml dot-net-bastion-vm:/tmp/backend.yaml \
-  --zone=asia-south2-b \
-  --project=project-84d8bfc9-cd8e-4b3c-b15 \
-  --tunnel-through-iap
+### 4.1 Update backend.yaml Image Tag
+
+The `k8s/backend.yaml` file should have:
+```yaml
+image: asia-south2-docker.pkg.dev/project-84d8bfc9-cd8e-4b3c-b15/dot-net-repo/backend:secret-manager-v2
 ```
 
-### 5.2 Deploy Backend
+**Note:** No ConfigMap updates needed - all configuration comes from Secret Manager!
+
+### 4.2 Copy backend.yaml to Bastion VM
 ```bash
-gcloud compute ssh dot-net-bastion-vm \
-  --zone=asia-south2-b \
-  --project=project-84d8bfc9-cd8e-4b3c-b15 \
-  --tunnel-through-iap \
-  --command "kubectl apply -f /tmp/backend.yaml"
+BASTION_IP=$(cd terraform && terraform output -raw bastion_external_ip)
+gcloud compute scp k8s/backend.yaml dot-net-bastion-vm:~/ --zone=asia-south2-b
+```
+
+### 4.3 Configure kubectl and Deploy Backend
+```bash
+gcloud compute ssh dot-net-bastion-vm --zone=asia-south2-b --command="gcloud container clusters get-credentials private-gke-cluster --zone=asia-south2-b"
+```
+```bash
+gcloud compute ssh dot-net-bastion-vm --zone=asia-south2-b --command="kubectl apply -f backend.yaml"
 ```
 
 **Expected output:**
@@ -111,69 +108,61 @@ deployment.apps/backend-deployment created
 service/backend-service created
 ```
 
-### 5.3 Wait for Backend ILB IP (takes 1-2 minutes)
+### 4.4 Verify Backend Pods are Running
 ```bash
-gcloud compute ssh dot-net-bastion-vm \
-  --zone=asia-south2-b \
-  --project=project-84d8bfc9-cd8e-4b3c-b15 \
-  --tunnel-through-iap \
-  --command "kubectl get svc backend-service -w"
+gcloud compute ssh dot-net-bastion-vm --zone=asia-south2-b --command="kubectl get pods -l app=backend"
 ```
 
-**Wait until EXTERNAL-IP shows an IP like `10.0.1.6` (not `<pending>`)**
+**Expected output:** Pods should be `Running` within 30-60 seconds
+```
+NAME                                  READY   STATUS    RESTARTS   AGE
+backend-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          45s
+backend-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          45s
+```
+
+### 4.5 Check Logs to Verify Secret Manager Integration
+```bash
+gcloud compute ssh dot-net-bastion-vm --zone=asia-south2-b --command="kubectl logs -l app=backend --tail=30 | grep -E '(Retrieved|Secret Manager|PostgreSQL|Redis)'"
+```
+
+**Expected output should show:**
+```
+✅ Retrieved project ID from metadata: project-84d8bfc9-cd8e-4b3c-b15
+✅ Retrieved secret: cloudsql-host
+✅ Retrieved secret: cloudsql-database
+✅ Retrieved secret: cloudsql-username
+✅ Retrieved secret: cloudsql-password
+✅ PostgreSQL connection initialized with all config from Secret Manager
+✅ Retrieved secret: redis-host
+✅ Retrieved secret: redis-port
+✅ Connected to Redis from Secret Manager config: 10.119.34.243:6379
+```
+
+---
+
+## Step 5: Get Backend Load Balancer IP
+
+### 5.1 Wait for Backend ILB IP (takes 1-2 minutes)
+```bash
+gcloud compute ssh dot-net-bastion-vm --zone=asia-south2-b --command="kubectl get svc backend-service -w"
+```
+
+**Wait until EXTERNAL-IP shows an IP like `10.0.2.9` (not `<pending>`)**
 
 Press `Ctrl+C` once you see the IP.
 
-### 5.4 Get Backend ILB IP
+### 5.2 Get and Store Backend ILB IP
 ```bash
-BACKEND_ILB_IP=$(gcloud compute ssh dot-net-bastion-vm \
-  --zone=asia-south2-b \
-  --project=project-84d8bfc9-cd8e-4b3c-b15 \
-  --tunnel-through-iap \
-  --command "kubectl get svc backend-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+BACKEND_ILB_IP=$(gcloud compute ssh dot-net-bastion-vm --zone=asia-south2-b --command="kubectl get svc backend-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
 
 echo "Backend ILB IP: $BACKEND_ILB_IP"
 ```
 
-**Example output:** `Backend ILB IP: 10.0.1.6`
+**Example output:** `Backend ILB IP: 10.0.2.9`
 
 ---
 
-## Step 6: Update Frontend Configuration
-
-### 6.1 Update `frontend/nginx.conf`
-
-Open the file and update this line:
-
-```nginx
-# Line ~43: Update backend proxy_pass
-proxy_pass http://10.0.1.6/api/;  # Replace 10.0.1.6 with $BACKEND_ILB_IP
-```
-
-**Manual edit:**
-```bash
-nano frontend/nginx.conf
-# OR
-code frontend/nginx.conf
-```
-
-**Automated update:**
-```bash
-sed -i "s|proxy_pass http://[0-9.]*\/api\/;|proxy_pass http://$BACKEND_ILB_IP/api/;|" frontend/nginx.conf
-```
-
-### 6.2 Update `frontend/src/environments/environment.prod.ts` (Optional)
-
-Update the comment on line ~13 with the correct backend IP:
-
-```typescript
-// Line ~13: Update comment
-* Bastion nginx routes /api/* to backend Internal Load Balancer (10.0.1.6)
-```
-
----
-
-## Step 7: Build and Push Frontend Image
+## Step 6: Build and Push Frontend Image
 
 ```bash
 cd frontend
@@ -184,19 +173,18 @@ cd ..
 
 **Expected output:** `digest: sha256:...` (image successfully pushed)
 
+**Note:** Frontend nginx configuration will be updated after deployment to use the Backend ILB IP.
+
 ---
 
-## Step 8: Deploy Frontend to GKE
+## Step 7: Deploy Frontend to GKE (Optional - if using Angular frontend)
 
-### 8.1 Copy frontend.yaml to Bastion VM
+### 7.1 Copy frontend.yaml to Bastion VM
 ```bash
-gcloud compute scp k8s/frontend.yaml dot-net-bastion-vm:/tmp/frontend.yaml \
-  --zone=asia-south2-b \
-  --project=project-84d8bfc9-cd8e-4b3c-b15 \
-  --tunnel-through-iap
+gcloud compute scp k8s/frontend.yaml dot-net-bastion-vm:~/ --zone=asia-south2-b
 ```
 
-### 8.2 Deploy Frontend
+### 7.2 Deploy Frontend
 ```bash
 gcloud compute ssh dot-net-bastion-vm \
   --zone=asia-south2-b \

@@ -1,6 +1,7 @@
 using StackExchange.Redis;
 using System.Text.Json;
 using DotNetGcpApp.Models;
+using DotNetGcpApp.SecretManager;
 
 namespace DotNetGcpApp.Redis
 {
@@ -19,22 +20,17 @@ namespace DotNetGcpApp.Redis
 
         /// <summary>
         /// Constructor that establishes connection to Memorystore Redis
-        /// Uses environment variables for configuration
+        /// Fetches configuration from Google Secret Manager
         /// </summary>
-        public RedisService(IConfiguration configuration, ILogger<RedisService> logger)
+        public RedisService(SecretManagerService secretManager, ILogger<RedisService> logger)
         {
             _logger = logger;
 
             try
             {
-                // Get Redis connection details from environment variables
-                var redisHost = Environment.GetEnvironmentVariable("REDIS_HOST") 
-                                ?? configuration["Redis:Host"] 
-                                ?? "10.127.80.5";
-                
-                var redisPort = Environment.GetEnvironmentVariable("REDIS_PORT") 
-                                ?? configuration["Redis:Port"] 
-                                ?? "6379";
+                // Get Redis connection details from Secret Manager
+                var redisHost = secretManager.GetSecretValue("redis-host");
+                var redisPort = secretManager.GetSecretValue("redis-port");
 
                 // Connect to Redis using private IP (no authentication required for Memorystore)
                 var configOptions = new ConfigurationOptions
@@ -48,7 +44,7 @@ namespace DotNetGcpApp.Redis
                 _redis = ConnectionMultiplexer.Connect(configOptions);
                 _database = _redis.GetDatabase();
 
-                _logger.LogInformation($"Connected to Redis at {redisHost}:{redisPort}");
+                _logger.LogInformation($"✅ Connected to Redis from Secret Manager config: {redisHost}:{redisPort}");
             }
             catch (Exception ex)
             {

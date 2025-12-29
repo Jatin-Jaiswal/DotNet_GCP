@@ -3,11 +3,12 @@ using DotNetGcpApp.Redis;
 using DotNetGcpApp.PubSub;
 using DotNetGcpApp.Storage;
 using DotNetGcpApp.Services;
+using DotNetGcpApp.SecretManager;
 
 /// <summary>
 /// Main entry point for the .NET 6 Web API application
 /// This file configures all services, middleware, and routing
-/// Integrates with GCP services: Cloud SQL, Redis, Pub/Sub, and Storage
+/// Integrates with GCP services: Cloud SQL, Redis, Pub/Sub, Storage, and Secret Manager
 /// </summary>
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +69,9 @@ builder.Services.AddCors(options =>
 // ======================================
 // Register all custom services as singletons
 // Singletons are created once and reused throughout the application lifetime
+
+// Secret Manager service (must be registered first as others depend on it)
+builder.Services.AddSingleton<SecretManagerService>();
 
 // Cloud SQL PostgreSQL service for database operations
 builder.Services.AddSingleton<PostgresService>();

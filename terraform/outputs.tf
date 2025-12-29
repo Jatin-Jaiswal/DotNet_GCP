@@ -67,3 +67,19 @@ output "bastion_service_account" {
   description = "Bastion service account email"
   value       = google_service_account.bastion_sa.email
 }
+
+output "secret_manager_secrets" {
+  description = "List of Secret Manager secret IDs"
+  value = [
+    google_secret_manager_secret.cloudsql_host.secret_id,
+    google_secret_manager_secret.cloudsql_database.secret_id,
+    google_secret_manager_secret.cloudsql_username.secret_id,
+    google_secret_manager_secret.cloudsql_password.secret_id,
+    google_secret_manager_secret.redis_host.secret_id,
+    google_secret_manager_secret.redis_port.secret_id,
+    google_secret_manager_secret.gcp_project_id.secret_id,
+    google_secret_manager_secret.pubsub_topic_id.secret_id,
+    google_secret_manager_secret.pubsub_subscription_id.secret_id,
+    google_secret_manager_secret.storage_bucket_name.secret_id,
+  ]
+}

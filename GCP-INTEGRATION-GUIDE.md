@@ -1,7 +1,211 @@
 # .NET 6 → GCP Services Integration Guide
 
 ## 🎯 Purpose
-This document explains **how .NET 6 code integrates with GCP services** - the libraries used, configuration approach, and code patterns for connecting to Cloud SQL, Redis, Pub/Sub, and Cloud Storage.
+This document explains **how .NET 6 code integrates with GCP services** - the libraries used, configuration approach, and code patterns for connecting to Cloud SQL, Redis, Pub/Sub, Cloud Storage, and **Secret Manager** for centralized secret management.
+
+---
+
+## � **Google Secret Manager Integration (Production-Grade)**
+
+### **Why Secret Manager?**
+- ✅ **No hardcoded credentials** in code or ConfigMaps
+- ✅ **Centralized secret management** across all environments
+- ✅ **Automatic secret rotation** without redeployment
+- ✅ **Audit logging** for all secret access
+- ✅ **Fine-grained IAM permissions** per secret
+
+### **Library Used:** `Google.Cloud.SecretManager.V1`
+
+```xml
+<!-- backend/src/DotNetGcpApp.csproj -->
+<PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.3.0" />
+```
+
+### **File:** `backend/src/SecretManager/SecretManagerService.cs`
+
+### **How Secret Manager Integration Works:**
+
+```
+GKE Metadata Service → Get Project ID → Secret Manager API → Fetch All Secrets → Application
+```
+
+#### **Step 1: Bootstrap Project ID from GKE Metadata Service**
+
+```csharp
+private string GetProjectIdFromMetadata()
+{
+    try
+    {
+        // GKE pods have access to metadata service (no authentication needed)
+        var request = WebRequest.Create("http://metadata.google.internal/computeMetadata/v1/project/project-id");
+        request.Headers.Add("Metadata-Flavor", "Google");  // Required header
+        
+        using var response = request.GetResponse();
+        using var reader = new StreamReader(response.GetResponseStream());
+        var projectId = reader.ReadToEnd();
+        
+        _logger.LogInformation($"✅ Retrieved project ID from metadata: {projectId}");
+        return projectId;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "❌ Failed to retrieve project ID from metadata service");
+        throw;
+    }
+}
+```
+
+**What This Does:**
+- Queries GKE's built-in metadata service (no credentials needed)
+- Returns the GCP project ID (`project-84d8bfc9-cd8e-4b3c-b15`)
+- Uses this to construct secret names (no hardcoding)
+
+#### **Step 2: Fetch Secrets from Secret Manager**
+
+```csharp
+public string GetSecretValue(string secretId)
+{
+    try
+    {
+        // Construct secret version name: projects/{project}/secrets/{secret}/versions/latest
+        var secretVersionName = new SecretVersionName(_projectId, secretId, "latest");
+        
+        // Call Secret Manager API using Workload Identity
+        var response = _client.AccessSecretVersion(secretVersionName);
+        
+        _logger.LogInformation($"✅ Retrieved secret: {secretId}");
+        return response.Payload.Data.ToStringUtf8();
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, $"❌ Failed to retrieve secret: {secretId}");
+        throw;
+    }
+}
+```
+
+**What This Does:**
+- Calls Secret Manager API with secret name
+- Uses **GKE Workload Identity** for authentication (no service account keys!)
+- Returns decrypted secret value
+- Logs access for audit trail
+
+#### **Step 3: Use Secrets in Services**
+
+**Example: PostgreSQL Service**
+```csharp
+public PostgresService(SecretManagerService secretManager, ILogger<PostgresService> logger)
+{
+    _logger = logger;
+    
+    // Fetch all database configuration from Secret Manager
+    var host = secretManager.GetSecretValue("cloudsql-host");
+    var database = secretManager.GetSecretValue("cloudsql-database");
+    var username = secretManager.GetSecretValue("cloudsql-username");
+    var password = secretManager.GetSecretValue("cloudsql-password");
+    
+    // Build connection string
+    _connectionString = $"Host={host};Database={database};Username={username};Password={password};Pooling=true;";
+    
+    _logger.LogInformation("✅ PostgreSQL connection initialized with all config from Secret Manager");
+}
+```
+
+**Example: Redis Service**
+```csharp
+public RedisService(SecretManagerService secretManager, ILogger<RedisService> logger)
+{
+    _logger = logger;
+    
+    var host = secretManager.GetSecretValue("redis-host");
+    var port = secretManager.GetSecretValue("redis-port");
+    
+    _connection = ConnectionMultiplexer.Connect($"{host}:{port}");
+    _database = _connection.GetDatabase();
+    
+    _logger.LogInformation($"✅ Connected to Redis from Secret Manager config: {host}:{port}");
+}
+```
+
+### **Secrets Created by Terraform:**
+
+| Secret ID | Description | Example Value |
+|-----------|-------------|---------------|
+| `cloudsql-host` | Cloud SQL private IP | `10.23.0.3` |
+| `cloudsql-database` | Database name | `dotnetdb` |
+| `cloudsql-username` | Database username | `postgres` |
+| `cloudsql-password` | Database password | `DotNet@123` |
+| `redis-host` | Redis private IP | `10.119.34.243` |
+| `redis-port` | Redis port | `6379` |
+| `gcp-project-id` | GCP project ID | `project-84d8bfc9-cd8e-4b3c-b15` |
+| `pubsub-topic-id` | Pub/Sub topic name | `dot-net-topic` |
+| `pubsub-subscription-id` | Pub/Sub subscription | `dot-net-sub` |
+| `storage-bucket-name` | Storage bucket name | `dot-net-bucket` |
+
+### **Authentication Flow (GKE Workload Identity):**
+
+```
+1. Pod starts with serviceAccount: backend-sa (Kubernetes SA)
+2. Kubernetes SA annotated with: iam.gke.io/gcp-service-account: backend-gke-sa@...
+3. GKE maps K8s SA → GCP Service Account
+4. Secret Manager API call uses GCP SA identity
+5. IAM checks: Does backend-gke-sa have roles/secretmanager.secretAccessor?
+6. If yes: Return decrypted secret
+7. If no: Deny access (403 Forbidden)
+```
+
+**No service account keys needed!** GKE handles authentication automatically.
+
+### **Terraform Configuration (Automatic Secret Creation):**
+
+```hcl
+# Create secrets
+resource "google_secret_manager_secret" "cloudsql_host" {
+  secret_id = "cloudsql-host"
+  replication { auto {} }
+}
+
+# Populate with infrastructure values
+resource "google_secret_manager_secret_version" "cloudsql_host_version" {
+  secret      = google_secret_manager_secret.cloudsql_host.id
+  secret_data = google_sql_database_instance.postgres.private_ip_address  # Dynamic!
+}
+
+# Grant IAM permissions
+resource "google_secret_manager_secret_iam_member" "cloudsql_host_access" {
+  secret_id = google_secret_manager_secret.cloudsql_host.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+```
+
+**Result:** When Cloud SQL IP changes, Terraform updates the secret automatically!
+
+### **Benefits Over Environment Variables:**
+
+| Aspect | Environment Variables | Secret Manager |
+|--------|----------------------|----------------|
+| **Security** | Visible in `kubectl describe pod` | Never exposed |
+| **Rotation** | Requires pod restart | Application can refetch |
+| **Audit** | No audit trail | Cloud Logging tracks access |
+| **Centralization** | Scattered across ConfigMaps | Single source of truth |
+| **Versioning** | No versioning | Full version history |
+| **Terraform Integration** | Manual updates | Auto-populated |
+
+### **Secret Rotation Example:**
+
+```bash
+# 1. Update secret in Secret Manager
+gcloud secrets versions add cloudsql-password --data-file=- <<< "NewPassword456"
+
+# 2. Update Cloud SQL password
+gcloud sql users set-password postgres --instance=dot-net-postgres --password="NewPassword456"
+
+# 3. Restart pods to pick up new secret
+kubectl rollout restart deployment backend-deployment
+```
+
+**No code changes, no ConfigMap updates, no redeployment!**
 
 ---
 
@@ -9,6 +213,9 @@ This document explains **how .NET 6 code integrates with GCP services** - the li
 
 ```xml
 <!-- backend/src/DotNetGcpApp.csproj -->
+
+<!-- Secret Manager (NEW!) -->
+<PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.3.0" />
 
 <!-- Cloud SQL (PostgreSQL) -->
 <PackageReference Include="Npgsql" Version="7.0.4" />
@@ -31,60 +238,50 @@ This document explains **how .NET 6 code integrates with GCP services** - the li
 
 ### **File:** `backend/src/CloudSql/PostgresService.cs`
 
-### **How Configuration Works:**
+### **How Configuration Works (with Secret Manager):**
 
 ```
-Kubernetes ConfigMap → Environment Variables → .NET Code
+Secret Manager → Fetch at Runtime → .NET Code → Cloud SQL Connection
 ```
 
-**Step 1: ConfigMap** (`k8s/backend.yaml`)
+**NEW: ConfigMap Now Empty** (`k8s/backend.yaml`)
 ```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: backend-config
 data:
-  CloudSql__Host: "10.252.0.3"        # Private IP of Cloud SQL
-  CloudSql__Database: "dotnetdb"
-  CloudSql__Username: "postgres"
-  CloudSql__Password: "DotNet@123"
+  # All GCP service configuration now fetched from Secret Manager!
+  # Only ASP.NET Core settings remain:
+  ASPNETCORE_URLS: "http://+:8080"
+  ASPNETCORE_ENVIRONMENT: "Production"
 ```
 
-**Step 2: Inject into Pod**
-```yaml
-containers:
-- name: backend
-  envFrom:
-  - configMapRef:
-      name: backend-config    # All ConfigMap values become env vars
-```
-
-**Step 3: Read in .NET Code**
+**NEW: Read from Secret Manager in .NET Code**
 ```csharp
-public PostgresService(IConfiguration configuration, ILogger<PostgresService> logger)
+public PostgresService(SecretManagerService secretManager, ILogger<PostgresService> logger)
 {
     _logger = logger;
     
-    // Priority: 1) Environment Variable → 2) appsettings.json → 3) Default
-    var host = Environment.GetEnvironmentVariable("CLOUDSQL_HOST") 
-               ?? configuration["CloudSql:Host"] 
-               ?? "10.92.160.3";
-    
-    var database = Environment.GetEnvironmentVariable("CLOUDSQL_DATABASE") 
-                   ?? configuration["CloudSql:Database"] 
-                   ?? "dotnetdb";
-    
-    var username = Environment.GetEnvironmentVariable("CLOUDSQL_USERNAME") 
-                   ?? configuration["CloudSql:Username"] 
-                   ?? "postgres";
-    
-    var password = Environment.GetEnvironmentVariable("CLOUDSQL_PASSWORD") 
-                   ?? configuration["CloudSql:Password"] 
-                   ?? "postgres";
+    // All configuration comes from Secret Manager (no fallbacks, no defaults)
+    var host = secretManager.GetSecretValue("cloudsql-host");
+    var database = secretManager.GetSecretValue("cloudsql-database");
+    var username = secretManager.GetSecretValue("cloudsql-username");
+    var password = secretManager.GetSecretValue("cloudsql-password");
 
     // Build connection string with connection pooling
     _connectionString = $"Host={host};Database={database};Username={username};Password={password};Pooling=true;MinPoolSize=0;MaxPoolSize=100;ConnectionLifetime=0;";
+    
+    _logger.LogInformation("✅ PostgreSQL connection initialized with all config from Secret Manager");
 }
+```
+
+**OLD (Before Secret Manager):**
+```csharp
+// ❌ OLD: Read from environment variables with fallbacks
+var host = Environment.GetEnvironmentVariable("CLOUDSQL_HOST") 
+           ?? configuration["CloudSql:Host"] 
+           ?? "10.92.160.3";  // Hardcoded fallback (bad practice!)
 ```
 
 ### **Key Integration Code:**
@@ -93,12 +290,12 @@ public PostgresService(IConfiguration configuration, ILogger<PostgresService> lo
 ```csharp
 public async Task InitializeDatabaseAsync()
 {
-    // Step 1: Create connection object with connection string
+    // Step 1: Create connection object with connection string (from Secret Manager)
     // Connection string contains: Host (Cloud SQL IP), Database name, Username, Password
     using var connection = new NpgsqlConnection(_connectionString);
     
     // Step 2: Open TCP connection to Cloud SQL PostgreSQL
-    // This establishes network connection over private IP (10.252.0.3:5432)
+    // This establishes network connection over private IP (e.g., 10.23.0.3:5432)
     await connection.OpenAsync();
 
     // Step 3: Define SQL DDL (Data Definition Language) command
@@ -128,20 +325,21 @@ public async Task InitializeDatabaseAsync()
 4. **Automatically closes connection** when done (using statement)
 
 **How It Integrates with Cloud SQL:**
-- **Network Path:** GKE Pod → VPC Private Network → Cloud SQL Private IP (10.252.0.3)
+- **Network Path:** GKE Pod → VPC Private Network → Cloud SQL Private IP (fetched from Secret Manager)
 - **Protocol:** PostgreSQL wire protocol over TCP port 5432
-- **Authentication:** PostgreSQL username/password (sent encrypted)
+- **Authentication:** PostgreSQL username/password (fetched from Secret Manager)
 - **Connection Pooling:** Npgsql maintains pool of reusable connections
 - **No Public Internet:** All traffic stays within Google Cloud private network
 
 **What Happens Behind the Scenes:**
-1. Npgsql driver resolves DNS/IP address of Cloud SQL
-2. TCP handshake establishes connection
-3. PostgreSQL authentication protocol exchanges credentials
-4. SQL command is serialized and sent over TCP
-5. Cloud SQL executes the DDL command
-6. Result (success/error) is returned to .NET application
-7. Connection returned to pool for reuse
+1. Application fetches Cloud SQL credentials from Secret Manager (one-time at startup)
+2. Npgsql driver resolves DNS/IP address of Cloud SQL
+3. TCP handshake establishes connection
+4. PostgreSQL authentication protocol exchanges credentials
+5. SQL command is serialized and sent over TCP
+6. Cloud SQL executes the DDL command
+7. Result (success/error) is returned to .NET application
+8. Connection returned to pool for reuse
 
 #### **2. Insert Data (Parameterized Query)**
 ```csharp
