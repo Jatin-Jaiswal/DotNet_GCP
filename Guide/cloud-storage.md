@@ -11,25 +11,21 @@
 ## Related File
 `backend/src/Storage/StorageService.cs`
 
-## Configuration
+## Configuration Source
 
-**ConfigMap** (`k8s/backend.yaml`)
-```yaml
-data:
-  Storage__BucketName: "dot-net-bucket"
-```
+- Secret Manager secret: `storage-bucket-name`
+- Terraform provisions the bucket, writes the secret, and grants `roles/storage.objectAdmin`
 
 **Runtime Resolution**
 ```csharp
-public StorageService(IConfiguration configuration, ILogger<StorageService> logger)
+public StorageService(SecretManagerService secretManager, ILogger<StorageService> logger)
 {
     _logger = logger;
 
-    _bucketName = Environment.GetEnvironmentVariable("STORAGE_BUCKET_NAME") 
-                  ?? configuration["Storage:BucketName"] 
-                  ?? "dot-net-bucket";
-
+    _bucketName = secretManager.GetSecretValue("storage-bucket-name");
     _storageClient = StorageClient.Create();
+
+    _logger.LogInformation($"Storage client initialized from Secret Manager: {_bucketName}");
 }
 ```
 

@@ -17,33 +17,26 @@
 - Supports easy onboarding of new consumers without changes to the producer
 - Guarantees at-least-once delivery with built-in retries
 
-## Configuration
+## Configuration Source
 
-**ConfigMap** (`k8s/backend.yaml`)
-```yaml
-data:
-  GCP__ProjectId: "project-84d8bfc9-cd8e-4b3c-b15"
-  PubSub__TopicId: "dot-net-topic"
-  PubSub__SubscriptionId: "dot-net-sub"
-```
+- Secret Manager secrets: `gcp-project-id`, `pubsub-topic-id`
+- Terraform seeds both secrets and grants the backend GCP service account `roles/pubsub.publisher`
 
 **Runtime Resolution**
 ```csharp
-public PubSubService(IConfiguration configuration, ILogger<PubSubService> logger)
+public PubSubService(SecretManagerService secretManager, ILogger<PubSubService> logger)
 {
-    _logger = logger;
+        _logger = logger;
 
-    var projectId = Environment.GetEnvironmentVariable("GCP_PROJECT_ID") 
-                    ?? configuration["GCP:ProjectId"] 
-                    ?? "project-84d8bfc9-cd8e-4b3c-b15";
-    
-    var topicId = Environment.GetEnvironmentVariable("PUBSUB_TOPIC_ID") 
-                  ?? configuration["PubSub:TopicId"] 
-                  ?? "dot-net-topic";
+        var projectId = secretManager.GetSecretValue("gcp-project-id");
+        var topicId = secretManager.GetSecretValue("pubsub-topic-id");
 
-    _topicName = $"projects/{projectId}/topics/{topicId}";
-    var topicName = TopicName.FromProjectTopic(projectId, topicId);
-    _publisher = PublisherClient.CreateAsync(topicName).GetAwaiter().GetResult();
+        _topicName = $"projects/{projectId}/topics/{topicId}";
+
+        var topicName = TopicName.FromProjectTopic(projectId, topicId);
+        _publisher = PublisherClient.CreateAsync(topicName).GetAwaiter().GetResult();
+
+        _logger.LogInformation($"Pub/Sub publisher initialized from Secret Manager: {_topicName}");
 }
 ```
 

@@ -11,28 +11,19 @@
 ## Related File
 `backend/src/Redis/RedisService.cs`
 
-## Configuration
+## Configuration Source
 
-**ConfigMap** (`k8s/backend.yaml`)
-```yaml
-data:
-  Redis__Host: "10.84.245.243"
-  Redis__Port: "6379"
-```
+- Secret Manager secrets: `redis-host`, `redis-port`
+- Created automatically by Terraform alongside the Memorystore instance
 
 **Runtime Resolution**
 ```csharp
-public RedisService(IConfiguration configuration, ILogger<RedisService> logger)
+public RedisService(SecretManagerService secretManager, ILogger<RedisService> logger)
 {
     _logger = logger;
 
-    var redisHost = Environment.GetEnvironmentVariable("REDIS_HOST") 
-                    ?? configuration["Redis:Host"] 
-                    ?? "10.127.80.5";
-    
-    var redisPort = Environment.GetEnvironmentVariable("REDIS_PORT") 
-                    ?? configuration["Redis:Port"] 
-                    ?? "6379";
+    var redisHost = secretManager.GetSecretValue("redis-host");
+    var redisPort = secretManager.GetSecretValue("redis-port");
 
     var configOptions = new ConfigurationOptions
     {
@@ -44,6 +35,8 @@ public RedisService(IConfiguration configuration, ILogger<RedisService> logger)
 
     _redis = ConnectionMultiplexer.Connect(configOptions);
     _database = _redis.GetDatabase();
+
+    _logger.LogInformation($"Connected to Redis from Secret Manager config: {redisHost}:{redisPort}");
 }
 ```
 

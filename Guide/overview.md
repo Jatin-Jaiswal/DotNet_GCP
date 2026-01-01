@@ -51,9 +51,9 @@ This guide explains how the .NET 6 backend communicates with Google Cloud servic
 | Service | Library | Config Source | Authentication |
 |---------|---------|---------------|----------------|
 | Cloud SQL | Npgsql 7.0.4 | Secret Manager | Username and password |
-| Memorystore Redis | StackExchange.Redis 2.6.122 | ConfigMap or Secret Manager | Private network (no password) |
-| Cloud Pub/Sub | Google.Cloud.PubSub.V1 3.7.0 | ConfigMap or Secret Manager | Workload Identity |
-| Cloud Storage | Google.Cloud.Storage.V1 4.6.0 | ConfigMap or Secret Manager | Workload Identity |
+| Memorystore Redis | StackExchange.Redis 2.6.122 | Secret Manager | Private network (no password) |
+| Cloud Pub/Sub | Google.Cloud.PubSub.V1 3.7.0 | Secret Manager | Workload Identity |
+| Cloud Storage | Google.Cloud.Storage.V1 4.6.0 | Secret Manager | Workload Identity |
 
 ## Security Practices
 - No service account keys stored in the repository; Workload Identity handles authentication
